@@ -1,0 +1,37 @@
+MSc CGVI Project Registration Form
+______________________________________________
+
+To the student:     Complete this form, then mail it to your SUPERVISOR.
+
+To the supervisor:  Please add your comments (if any) to the bottom of the 
+		    form, then mail a copy to j.kautz@cs.ucl.ac.uk .
+
+
+Name:
+  Martijn van der Veen
+
+Degree course:
+  MSc Computer Graphics, Vision and Imaging
+
+Supervisor(s):
+  Gabriel Brostow
+
+Project Title:
+  Constructing the concave hull of an outdoor scene (object)
+  using visibility traces of points and edges
+
+Brief Outline of Aims:
+  Space carving is a technique that uses silhouettes of a single object in
+  multiple photos (taken at known locations) to construct the convex hull
+  in which the object is supposed to be. The method, however, has some
+  limitations.
+  The aim of the project is to include tracking the visibility of points of
+  interest and (possibly) edges in a series of images to construct a _concave_
+  hull (hollowed inwards). The developed algorithm will be tested on buildings
+  in outdoor environments. As a second step, buildings can be tried to be
+  projected in footage of another environment using the 3D model and textures
+  acquired from the set of images.
+
+
+
+
