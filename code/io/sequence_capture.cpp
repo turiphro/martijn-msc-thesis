@@ -5,6 +5,7 @@ SequenceCapture::SequenceCapture(int device)
 {
   type = CAMERA;
   videoCapture = new VideoCapture(device);
+  position = 0;
 }
 
 // constructor for avi files or directory with images
