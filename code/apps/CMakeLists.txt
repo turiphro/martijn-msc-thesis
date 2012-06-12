@@ -1,0 +1,11 @@
+# introduction for pcl: http://www.pointclouds.org/documentation/tutorials/using_pcl_pcl_config.php#using-pcl-pcl-config
+cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+project(VISIBILITY_CARVING)
+set(CMAKE_BUILD_TYPE Debug)
+find_package(PCL 1.3 REQUIRED COMPONENTS common io filters)
+find_package(OpenCV 2.3 REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+add_executable(test test.cpp ../io/sequence_capture.cpp ../objects/feature_sequence.cpp)
+target_link_libraries(test ${OpenCV_LIBS} ${PCL_LIBRARIES})

@@ -1,0 +1,7 @@
+2012/06/01
+==========
+- Installed Ubuntu 12.04
+- Installed OpenCV 2.4.1 (compiled)
+- Installed PCL 1.5 (ppa)
+
+

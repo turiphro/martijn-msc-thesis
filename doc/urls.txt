@@ -1,0 +1,49 @@
+============
+    PCL
+============
+
+* Point Clouds
+  general: http://pointclouds.org/documentation/tutorials/pcd_file_format.php#pcd-file-format
+  reading: http://pointclouds.org/documentation/tutorials/reading_pcd.php#reading-pcd
+  writing: http://pointclouds.org/documentation/tutorials/writing_pcd.php#writing-pcd
+
+
+============
+   OpenCV
+============
+
+* SfM:
+  SIFT: http://stackoverflow.com/questions/5461148/sift-implementation-with-opencv-2-2
+
+
+
+============
+ Other Libs
+============
+
+* OpenNI (kinect driver): 
+  docs: http://openni.org/Documentation/home.html
+  viewer example code: http://pointclouds.org/documentation/tutorials/openni_grabber.php#openni-grabber
+* FLANN (nearest neighbour): http://www.cs.ubc.ca/~mariusm/index.php/FLANN/FLANN
+* BOOST (divers): http://www.boost.org/
+
+
+============
+    vsfm
+============
+
+Docs (incl NVM files): http://www.cs.washington.edu/homes/ccwu/vsfm/doc.html#usage
+
+
+============
+   Bundler
+============
+
+Docs (incl PLY files): http://phototour.cs.washington.edu/bundler/bundler-v0.4-manual.html#S6
+
+
+
+============
+  Datasets
+============
+http://cmp.felk.cvut.cz/projects/is3d/Data.html

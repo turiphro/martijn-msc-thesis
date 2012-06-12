@@ -1,3 +1,8 @@
 data
 ref
 code/libraries
+build
+.empty
+a.out
+.*~
+.*.swp
