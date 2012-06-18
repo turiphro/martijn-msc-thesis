@@ -46,3 +46,11 @@ Software requirements
     Need to make some patches as suggested by gcc.
     sudo cp lib/libANN_char.so /usr/lib/
 
+
+
+Compile instructions:
+
+ mkdir build && cd build
+ cmake ..
+ make
+
