@@ -4,4 +4,53 @@
 - Installed OpenCV 2.4.1 (compiled)
 - Installed PCL 1.5 (ppa)
 
+==========
+- Installed voodoo
+- Installed vsfm
+- Installed bundler
+- Made webcamviewer
+- Made featureviewer (keypoints, edges, tracking keypoints)
+  Tracking often unreliable.
+
+
+2012/06/19
+==========
+- Started daily logging
+- Made featureviewer recording option
+- Made featureviewer backwards tracking
+- Made featureviewer distinctiveness plot
+
+2012/06/20
+==========
+- Compiled LearningOcclusions training set (lean)
+- Read LearningOcclusions paper
+- Made image sequence houses1 (sunny, high res)
+  Tracking performs pretty well on distinctive points.
+
+2012/06/21
+==========
+- (PGM meeting)
+- Made 4 image sequences with HD camera
+
+2012/06/25
+==========
+- Got Bundler working (Windows)
+- Got VisualSfM working (Windows)
+- Created some point clouds + visibility sets
+- Tested LearningOcclusions on own data (works OK but slow)
+
+2012/06/26
+==========
+- Worked on SfMReader
+
+2012/06/27
+==========
+- Made SfMReader for .nvm
+- Made simple sfmviewer (points only)
+
+2012/06/28
+==========
+- (PGM meeting)
+- Added camera poses to sfmviewer
+
 

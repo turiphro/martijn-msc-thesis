@@ -37,7 +37,7 @@ SequenceCapture::SequenceCapture(string path)
     closedir(dp);
     sort(images.begin(), images.end());
     if (images.size()==0)
-      cout << "[!!] Warning: no valid images found in " << path << "!" << endl;
+      cerr << "[!!] Warning: no valid images found in " << path << "!" << endl;
   }
 }
 

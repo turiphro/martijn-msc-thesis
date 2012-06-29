@@ -4,29 +4,58 @@
 #ifndef SFMREADER_H
 #define SFMREADER_H
 
-#include <iostream>
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include <vector>
+#include <map>
 #include <dirent.h>
-#include "../objects/Camera.hpp"
-#include "../objects/InterestPoint.hpp"
+#include <opencv2/core/core.hpp>
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+//#include <pcl/io/ply_io.h>
+#include <pcl/visualization/common/common.h>
+
 
 using namespace std;
+using namespace pcl;
+using namespace cv;
 
+typedef struct visibility
+{
+  int index;
+  double x;
+  double y;
+} visibility;
 
 class SfMReader
 {
 
   private:
     string path;
-    vector<Camera> cameras;
-    vector<InterestPoint> interestPoints;
-    // Consider using a pointcloud for this
-    // see example at: http://pointclouds.org/documentation/tutorials/adding_custom_ptype.php#adding-custom-ptype
+
+    bool readNVM();
+    bool readOUT();
+    bool readPLY();
+    bool readTXT();
+    bool readPCD();
+    bool integerLine(string line, int count=1);
 
   public:
+    PointCloud<PointXYZRGB> points;
+    PointCloud<PointXYZRGB> poses;
+    vector<visualization::Camera> cameras;
+    vector<map<int,visibility> > visible; 
+    //vector<io::ply::camera>
+    bool updated; // handy in visualizer
+
+    SfMReader();
     SfMReader(string path);
     ~SfMReader();
-    
+    bool read();
+    bool read(string path);
 
-}
+};
+
+#endif

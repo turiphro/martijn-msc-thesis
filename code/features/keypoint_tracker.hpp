@@ -22,14 +22,11 @@ class KeypointTracker
     //enum type {NN};
     vector<vector<KeyPoint> *>* kpp;
     vector<Mat *>* kdp;
-    int kp_ref;
-    int frame_ref;
-    int kp_lastseen;
-    int frame_lastseen;
-    int frame_lasttested;
-    //KeyPoint** track;
+    int kp_ref, kp_lastseen, kp_firstseen;
+    int frame_ref, frame_lastseen, frame_firstseen;
+    int frame_lasttested, frame_firsttested;
     int* track;
-    
+    double* distinctiveness;
 
   public:
     KeypointTracker(vector<vector<KeyPoint> *>* kpp, vector<Mat *>* kdp, int kp_ref, int frame_ref=0, int type=0);
@@ -38,6 +35,8 @@ class KeypointTracker
     void trackAll();
     void trackUntil(int position);
     int getBestMatch(int position);
+    void plotDistinctiveness(Mat& output, int frame_curr=-1);
+    void plot(Mat& output, double *data, int count, int frame_curr=-1, Scalar colour=Scalar(0,0,255), bool reDraw=true, Size size=Size(300,80));
 
 };
 

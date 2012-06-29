@@ -7,8 +7,7 @@
 using namespace std;
 
 
-void
-usage(char* name)
+void usage(char* name)
 {
   cout << "Usage:" << endl;
   cout << " " << name << " <path> [<pointDetector> [<pointDescriptor> [<edgeDetector>]]]" << endl;
@@ -22,8 +21,7 @@ usage(char* name)
 }
 
 /* useful functions */
-bool
-isInteger(char* arg)
+bool isInteger(char* arg)
 {
   while (*arg)
     if (*arg<='9' && *arg>='0')
@@ -50,8 +48,7 @@ void onMouse(int event, int x, int y, int, void* td)
 
 
 /* main */
-int
-main (int argc, char** argv)
+int main (int argc, char** argv)
 {
 
   if (argc==1)
@@ -76,6 +73,9 @@ main (int argc, char** argv)
   td.startTracking = false;
   setMouseCallback("features", onMouse, &td);
   KeypointTracker* tracker = NULL;
+  Mat distinctiveness_plot;
+
+  VideoWriter* recorder = NULL;
 
   bool paused = false;
   bool richDraw = true, matchDraw = true;
@@ -102,15 +102,27 @@ main (int argc, char** argv)
         if (tracker)
           delete tracker;
         tracker = new KeypointTracker(&fs->kp, &fs->kd, nearest, i);
+        namedWindow("distinctiveness", CV_WINDOW_NORMAL);
       }
       // draw tracked interest point
       if (tracker) {
-        tracker->trackUntil(i);
-        if (tracker->getBestMatch(i) != -1)
+        //tracker->trackUntil(i);
+        // calculate all tracking info:
+        // (will be done incrementally if feature data not known yet)
+        tracker->trackUntil(0);
+        tracker->trackUntil(count-1);
+        if (tracker->getBestMatch(i) > -1)
           circle(output, fs->kp.at(i)->at(tracker->getBestMatch(i)).pt, 10, Scalar(0,255,0), 4);
+        tracker->plotDistinctiveness(distinctiveness_plot, i);
+        imshow("distinctiveness", distinctiveness_plot);
       }
 
+      // show result
       imshow("features", output);
+
+      // if recording, save frame
+      if (recorder)
+        *recorder << output;
     }
     last_i = i;
     switch(waitKey(30)) {
@@ -118,6 +130,7 @@ main (int argc, char** argv)
       cout << "Keyboard shortcuts:" << endl;
       cout << " q/ESC:    quit" << endl;
       cout << " --- navigation ---" << endl;
+      cout << " r:        refresh" << endl;
       cout << " space:    pause/resume" << endl;
       cout << " ->/n:     next frame" << endl;
       cout << " <-/p:     prev frame" << endl;
@@ -129,13 +142,17 @@ main (int argc, char** argv)
       cout << " --- visuals ---" << endl;
       cout << " 1:        rich keypoint draw on/off" << endl;
       cout << " 2:        match arrows draw on/off" << endl;
-      cout << " --- tracking ---" << endl;
+      cout << " --- various ---" << endl;
       cout << " <click>   start tracking interest point" << endl;
       cout << " t         stop tracking" << endl;
+      cout << " s         start/stop saving visible frames" << endl;
       break;
      case 'q':
      case 27: // esc
       exit(0);
+     case 'r':
+      last_i = -2; // refresh
+      break;
      case 32: // space
      case 13: // return
       paused = !paused;
@@ -180,9 +197,24 @@ main (int argc, char** argv)
       if (tracker) {
         delete tracker;
         tracker = NULL;
+        destroyWindow("distinctiveness");
         last_i = -2; // refresh
       }
       break;
+     case 's':
+      if (recorder) {
+        // stop recording
+        cout << "Stopped recording at frame " << i << endl;
+        delete recorder;
+        recorder = NULL;
+      } else {
+        // start recording
+        cout << "Starting recording from frame " << ((!paused) ? i : i+1) << endl;
+        time_t tim; time(&tim); string ctim = (string)ctime(&tim);
+        string record_filename = "output " + ctim.substr(0,ctim.size()-1) + ".avi";
+        recorder = new VideoWriter(record_filename, CV_FOURCC('D','I','V','X'),
+                                   10, output.size(), true);
+      }
     }
 
     if (!paused)
