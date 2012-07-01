@@ -34,14 +34,10 @@ void pp_callback(const pcl::visualization::PointPickingEvent& event, void* sfm_p
       sfm->poses.at(id).z == z) {
     // update camera view
     cout << "it's a camera!" << endl;
-    sfm->poses.at(id).r = 255;
-    sfm->poses.at(id).g = 0;
-    sfm->poses.at(id).b = 0;
+    sfm->selectPointsForCamera(id);
   } else {
     cout << "it's a point!" << endl;
-    sfm->points.at(id).r = 255;
-    sfm->points.at(id).g = 0;
-    sfm->points.at(id).b = 0;
+    sfm->selectCamerasForPoint(id);
   }
 
   sfm->updated = true;

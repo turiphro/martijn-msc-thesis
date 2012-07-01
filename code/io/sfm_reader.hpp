@@ -43,7 +43,7 @@ class SfMReader
     bool integerLine(string line, int count=1);
 
   public:
-    PointCloud<PointXYZRGB> points;
+    PointCloud<PointXYZRGB> points, points_original;
     PointCloud<PointXYZRGB> poses;
     vector<visualization::Camera> cameras;
     vector<map<int,visibility> > visible; 
@@ -55,6 +55,16 @@ class SfMReader
     ~SfMReader();
     bool read();
     bool read(string path);
+    bool selectPointsForCamera(int id,
+                               Scalar colourCamera = Scalar(0,255,255),
+                               Scalar colourSelectedCamera = Scalar(0,0,255),
+                               Scalar colourSelectedPoint = Scalar(0,0,255));
+    bool selectCamerasForPoint(int id,
+                               Scalar colourCamera = Scalar(0,255,255),
+                               Scalar colourSelectedCamera = Scalar(0,0,255),
+                               Scalar colourSelectedPoint = Scalar(0,0,255));
+
+    void resetPointColours();
 
 };
 

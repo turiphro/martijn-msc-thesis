@@ -53,4 +53,6 @@
 - (PGM meeting)
 - Added camera poses to sfmviewer
 
-
+2012/06/29
+==========
+- Worked on sfmviewer point picker

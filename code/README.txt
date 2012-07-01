@@ -24,12 +24,21 @@ Software requirements
      http://pointclouds.org/downloads/
 
 
-3. Download Voodoo (I got 1.2.0 beta)
+3. Install OctoMap (I got 1.4.2)
+
+    http://octomap.sourceforge.net/
+
+    Ubuntu:
+     sudo apt-get install cmake doxygen libqt4-dev libqt4-opengl-dev
+     cd build && cmake .. && make && sudo make install
+
+
+4. Download Voodoo (I got 1.2.0 beta)
 
     http://www.digilab.uni-hannover.de/download.html
 
 
-4. Install VisualSFM (I got 0.5.17)
+5. Install VisualSFM (I got 0.5.17)
 
     Instructions: http://www.cs.washington.edu/homes/ccwu/vsfm/install.html#linux
     Need to install SiftGPU, which needs some hacks in the source code (!)
@@ -38,7 +47,7 @@ Software requirements
     Download Lowe's sift binary (extract binary only to vsfm/bin/): http://www.cs.ubc.ca/~lowe/keypoints/
 
 
-5. Install Bundler (I got 0.4)
+6. Install Bundler (I got 0.4)
 
     sudo apt-get install gfortran libgfortran3 liblapack-dev libblas-dev libblacs-mpi-dev libminpack1 libf2c2-dev libann-dev
     (not sure which ones are really necessary)
