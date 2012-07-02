@@ -33,10 +33,10 @@ void pp_callback(const pcl::visualization::PointPickingEvent& event, void* sfm_p
       sfm->poses.at(id).y == y &&
       sfm->poses.at(id).z == z) {
     // update camera view
-    cout << "it's a camera!" << endl;
+    cout << "it's a camera at (" << x << ", " << y << ", " << z << ")!" << endl;
     sfm->selectPointsForCamera(id);
   } else {
-    cout << "it's a point!" << endl;
+    cout << "it's a point at (" << x << ", " << y << ", " << z << ")!" << endl;
     sfm->selectCamerasForPoint(id);
   }
 
@@ -81,18 +81,24 @@ int main (int argc, char** argv)
   //viewer.addCoordinateSystem (1.0);
   viewer.initCameraParameters ();
 
+  int msg_nr = 1;
+  if (sfm.visible.size() == 0)
+    viewer.addText("No visibility info", 10, 10 + (10 * msg_nr++), 0.8,0,1);
+  if (sfm.poses.size() == 0)
+    viewer.addText("No camera poses", 10, 10 + (10 * msg_nr++), 1,1,0);
+
 
   while (!viewer.wasStopped()) {
     viewer.spinOnce(100);
 
     if (sfm.updated) {
-      cout << "Updated!" << endl;
       viewer.updatePointCloud(points, "points");
       viewer.updatePointCloud(poses, "poses"); 
       sfm.updated = false;
     }
   }
 
+  //PCL 1.6+: viewer.close();
 
   // more drawing: use viewer.getRenderWindow() and use VTK
 

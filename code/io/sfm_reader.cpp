@@ -54,6 +54,12 @@ bool SfMReader::read(string path)
 
   if (ext == "nvm")
     return readNVM(); // VisualSFM 
+  else if (ext == "out")
+    return readOUT(); // Bundler
+  else if (ext == "ply")
+    return readPLY(); // VisualSFM/Bundler
+  else if (ext == "txt")
+    return readTXT(); // Voodoo
   else
     cerr << "[!!] (SfMReader::read) unknown file format: " << ext << endl;
 
@@ -174,11 +180,113 @@ bool SfMReader::readOUT()
    * contains: cameras, points, visibility
    * format:
    *  http://phototour.cs.washington.edu/bundler/bundler-v0.4-manual.html#S6
-   *  <header>          (2 lines)
-   *  <cameras>         (5 lines each)
-   *  <points pos+col>  (3 lines each)  + <visibility ijxy>
+   *  0: <header>          (2 lines)
+   *  1: <cameras>         (5 lines each)
+   *  2: <points pos+col>  (3 lines each)  + <visibility ijxy>
    */
 
+  ifstream file(path.c_str());
+  if (!file.is_open())
+    return false;
+
+  int camera_count, point_count;
+
+  int state = 0; // for states see comment above
+  string line;
+  while (file.good()) {
+    getline(file, line);
+    stringstream sline(line);
+    string filename;
+    switch (state) {
+      case 0: // header
+        if (integerLine(line, 2)) {
+          sline >> camera_count >> point_count;
+          state = 1;
+        }
+        break;
+      case 1: // cameras
+        if (camera_count-- == 0) {
+          state = 2;
+          sline.flush();
+          sline << line;
+          // no break! use this line
+        } else {
+          // new camera
+          double cx, cy, cz;  // pos: position
+          double focal_l, r11,r12,r13,r21,r22,r23,r31,r32,r33;
+          double radial_dist1, radial_dist2;
+          sline >> focal_l >> radial_dist1 >> radial_dist2;
+          getline(file, line);
+          sline.str(line);
+          sline >> r11 >> r21 >> r31;
+          getline(file, line);
+          sline.str(line);
+          sline >> r12 >> r22 >> r32;
+          getline(file, line);
+          sline.str(line);
+          sline >> r13 >> r23 >> r33;
+          getline(file, line);
+          sline.str(line);
+          sline >> cx >> cy >> cz;
+          // TODO: convert rotation to focal look-at
+          // visualization::Camera can easily be used to set the visualizer view
+
+          // add new camera to list of cameras
+          cameras.push_back(visualization::Camera());
+          cameras.back().pos[0] = cx;
+          cameras.back().pos[1] = cy;
+          cameras.back().pos[2] = cz;
+          // also add camera pose to poses point cloud:
+          poses.push_back(PointXYZRGB(255,255,0));
+          poses.back().x = cx;
+          poses.back().y = cy;
+          poses.back().z = cz;
+          break;
+        }
+      case 2: // points
+        if (point_count-- == 0) {
+          state = 3;
+          break;
+        }
+        
+        // add new point to point cloud
+        float x,y,z;
+        int r,g,b;
+        sline >> x >> y >> z;
+        getline(file, line);
+        sline.str(line);
+        sline >> r >> g >> b;
+
+        points.push_back(PointXYZRGB(r,g,b));
+        points.back().x = x;
+        points.back().y = y;
+        points.back().z = z;
+
+        // add visibility to visible
+        visible.push_back(map<int,visibility>());
+        int vis_count, frame, index;
+        getline(file, line);
+        sline.str(line);
+        sline >> vis_count;
+        while (vis_count-- > 0) {
+          sline >> frame >> index >> x >> y;
+          visible.back().insert(pair<int,visibility>(frame,visibility()));
+          visible.back().find(frame)->second.index = index;
+          visible.back().find(frame)->second.x = x;
+          visible.back().find(frame)->second.y = y;
+        }
+        
+        break;
+      case 3: // end
+        break;
+    }
+  }
+  file.close();
+
+  cout << poses.size() << " poses read!" << endl;
+  cout << points.size() << " points read!" << endl;
+
+  return true;
 }
 
 bool SfMReader::readPLY()
@@ -187,29 +295,139 @@ bool SfMReader::readPLY()
    * contains: 
    * format:
    *  http://local.wasp.uwa.edu.au/~pbourke/dataformats/ply/
-   *  <header>          (10+ lines)     list of columns of table
-   *  <points pos+col>  (1 line each)   NO visibility (no dynamic list length)
+   *  0: <header>          (10+ lines)     list of columns of table
+   *  1: <points pos+col>  (1 line each)   NO visibility (no dynamic list length)
+   *                                       and NO camera poses
    */
 
   // pcl::PLYReader?
   // http://docs.pointclouds.org/trunk/classpcl_1_1_p_l_y_reader.html
+
+  ifstream file(path.c_str());
+  if (!file.is_open())
+    return false;
+
+  int state = 0; // for states see comment above
+  string line;
+  while (file.good()) {
+    getline(file, line);
+    stringstream sline(line);
+    string filename;
+    switch (state) {
+      case 0: // header
+        if (line.find("end_header") == 0) {
+          state = 1;
+        }
+        break;
+      case 1: // points
+        if (line == "") {
+          state = 2;
+          break;
+        }
+        
+        // add new point to point cloud
+        float x,y,z;
+        int r,g,b;
+        // ! assuming X Y Z R G B [foo]
+        sline >> x >> y >> z >> r >> g >> b;
+        points.push_back(PointXYZRGB(r,g,b));
+        points.back().x = x;
+        points.back().y = y;
+        points.back().z = z;
+        break;
+      case 2: // end
+        break;
+    }
+  }
+  file.close();
+
+  cout << points.size() << " points read!" << endl;
+
+  return true;
   
 }
 
 bool SfMReader::readTXT()
 {
-  /* output from: voodoo (hopefully)
+  /* output from: voodoo (probably)
    * contains:
    * format:
    *  (documented in the files itself)
-   *  <header>          (39+ lines)     documentation of file format
-   *  <cameras>         (2 lines each)
-   *  <header>          (3 lines)
-   *  <points pos>      (1 line each)   NO visibility
+   *  0: <header>          (39+ lines)    documentation of file format
+   *  1: <cameras>         (2 lines each)
+   *  2: <header>          (3 lines)
+   *  3: <points pos>      (1 line each)   NO visibility, NO colour
+   *  4: <empty lines>
    */
 
-  cout << "TODO: readTXT" << endl;
-  return false;
+  ifstream file(path.c_str());
+  if (!file.is_open())
+    return false;
+
+  int state = 0; // for states see comment above
+  string line;
+  while (file.good()) {
+    getline(file, line);
+    stringstream sline(line);
+    string filename;
+    switch (state) {
+      case 0: // header
+        if (line == "#timeindex 1") {
+          state = 1;
+        }
+        break;
+      case 1: // cameras
+        if (line == "#") {
+          state = 2;
+          break;
+        } else if (line.at(0) == '#') {
+          break;
+        }
+        // new camera
+        double cx, cy, cz;  // pos: position
+        sline >> cx >> cy >> cz;
+        // TODO: convert and use other variables
+
+        // add new camera to list of cameras
+        cameras.push_back(visualization::Camera());
+        cameras.back().pos[0] = cx;
+        cameras.back().pos[1] = cy;
+        cameras.back().pos[2] = cz;
+        // also add camera pose to poses point cloud:
+        poses.push_back(PointXYZRGB(255,255,0));
+        poses.back().x = cx;
+        poses.back().y = cy;
+        poses.back().z = cz;
+        break;
+      case 2: // header
+        if (line.at(0) != '#') {
+          state = 3;
+        }
+        break;
+      case 3: // points
+        if (line == "") {
+          state = 4;
+          break;
+        }
+        
+        // add new point to point cloud
+        float x,y,z;
+        sline >> x >> y >> z;
+        points.push_back(PointXYZRGB(200,200,200));
+        points.back().x = x;
+        points.back().y = y;
+        points.back().z = z;
+        break;
+      case 4: // header
+        break;
+    }
+  }
+  file.close();
+
+  cout << poses.size() << " poses read!" << endl;
+  cout << points.size() << " points read!" << endl;
+
+  return true;
 }
 
 bool SfMReader::readPCD()
@@ -300,7 +518,7 @@ bool SfMReader::selectCamerasForPoint(int id,
                                       Scalar colourSelectedCamera,
                                       Scalar colourSelectedPoint)
 {
-  if (visible.size() < id)
+  if (points.size() < id)
     return false;
 
   // colour point
@@ -315,6 +533,11 @@ bool SfMReader::selectCamerasForPoint(int id,
     poses.at(i).g = colourCamera[1];
     poses.at(i).b = colourCamera[0];
   }
+
+  if (visible.size() < id)
+    // no visibility info for this point
+    // (probably none at all)
+    return false;
 
   // recolour poses for given point
   map<int,visibility>* vismap = &visible.at(id);

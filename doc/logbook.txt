@@ -56,3 +56,9 @@
 2012/06/29
 ==========
 - Worked on sfmviewer point picker
+
+2012/07/01
+==========
+- Added camera pose view and point visibility view to sfmviewer
+
+
