@@ -17,10 +17,18 @@ void usage(char* name)
   exit(1);
 }
 
+typedef struct {
+  SfMReader* sfm;
+  pcl::visualization::PCLVisualizer* viewer;
+  bool updated;
+  bool lineDraw;
+} callbackObject;
 
-void pp_callback(const pcl::visualization::PointPickingEvent& event, void* sfm_ptr)
+
+void pp_callback(const pcl::visualization::PointPickingEvent& event, void* options_ptr)
 {
-  SfMReader* sfm = (SfMReader*) sfm_ptr;
+  callbackObject* options = (callbackObject*) options_ptr;
+
   int id = event.getPointIndex();
   if (id == -1)
     return;
@@ -28,20 +36,62 @@ void pp_callback(const pcl::visualization::PointPickingEvent& event, void* sfm_p
   float x, y, z;
   event.getPoint (x, y, z);
 
-  if (sfm->poses.size() > id &&
-      sfm->poses.at(id).x == x &&
-      sfm->poses.at(id).y == y &&
-      sfm->poses.at(id).z == z) {
+  if (options->sfm->poses.size() > id &&
+      options->sfm->poses.at(id).x == x &&
+      options->sfm->poses.at(id).y == y &&
+      options->sfm->poses.at(id).z == z) {
     // update camera view
     cout << "it's a camera at (" << x << ", " << y << ", " << z << ")!" << endl;
-    sfm->selectPointsForCamera(id);
+    options->sfm->selectPointsForCamera(id);
   } else {
     cout << "it's a point at (" << x << ", " << y << ", " << z << ")!" << endl;
-    sfm->selectCamerasForPoint(id);
+    options->sfm->selectCamerasForPoint(id);
   }
 
-  sfm->updated = true;
+  options->updated = true;
 }
+
+void kb_callback(const pcl::visualization::KeyboardEvent& event, void* options_ptr)
+{
+  callbackObject* options = (callbackObject*) options_ptr;
+
+  if (!event.keyDown())
+    return;
+
+  if (event.getKeyCode() == '?') {
+    cout << "Keyboard shortcuts: (press h for PCL shortcuts)" << endl;
+    cout << " l:     line draw on/off" << endl;
+    cout << " b/w:   set background colour to black/white" << endl;
+  } else if (event.getKeyCode() == 'l') {
+    options->updated = true;
+    options->lineDraw = !options->lineDraw;
+  } else if (event.getKeyCode() == 'b') {
+    options->viewer->setBackgroundColor(0,0,0);
+  } else if (event.getKeyCode() == 'w') {
+    options->viewer->setBackgroundColor(1,1,1);
+  }
+
+
+}
+
+
+/* drawing functions */
+
+void drawLines(pcl::visualization::PCLVisualizer& viewer, SfMReader& sfm, int maxLines = 250)
+{
+  viewer.removeAllShapes();
+  stringstream name("");
+  if (sfm.line_ends.size() > maxLines) {
+    cout << "Too many lines (" << sfm.line_ends.size() << ") to draw! ";
+    cout << "Only drawing first " << maxLines << " lines." << endl;
+  }
+  for (int i=0; i<min((int)sfm.line_ends.size(), maxLines); i++) {
+    name.str("line");
+    name << i;
+    viewer.addLine(*sfm.line_start, *sfm.line_ends.at(i), 0,1,0, name.str());
+  }
+}
+
 
 
 /* main */
@@ -52,33 +102,27 @@ int main (int argc, char** argv)
     usage(argv[0]);
 
   SfMReader sfm(argv[1]);
+  pcl::visualization::PCLVisualizer viewer("Cloud viewer");
 
-  /* visualise:
-   *  CloudViewer (simple): http://pointclouds.org/documentation/tutorials/cloud_viewer.php
-   *  PCLVisualizer (adv):  http://pointclouds.org/documentation/tutorials/pcl_visualizer.php
-   *   \__ has line and sphere draw functions; lots of info down at page
-   *
-   * functions:
-   * - draw cameras
-   * - click camera: colour visible points
-   * - click point:  colour corresponding cameras
-   * - view from camera
-   */
+  // set options
+  callbackObject options;
+  options.sfm = &sfm;
+  options.viewer = &viewer;
+  options.updated = false;
+  options.lineDraw = false;
 
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr points(&sfm.points);
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr poses(&sfm.poses);
-  //pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
-  //    poses_colours(poses, 255, 255, 0);
 
-  pcl::visualization::PCLVisualizer viewer("Cloud viewer");
-  viewer.registerPointPickingCallback(pp_callback, &sfm);
+  viewer.registerPointPickingCallback(pp_callback, &options);
+  viewer.registerKeyboardCallback(kb_callback, &options);
 
   viewer.addPointCloud(points, "points");
   viewer.addPointCloud(poses, "poses");
   viewer.setBackgroundColor(0,0,0);
   viewer.setPointCloudRenderingProperties(visualization::PCL_VISUALIZER_POINT_SIZE, 2, "points");
   viewer.setPointCloudRenderingProperties(visualization::PCL_VISUALIZER_POINT_SIZE, 3, "poses");
-  //viewer.addCoordinateSystem (1.0);
+  //viewer.addCoordinateSystem (1.0);  // draw origin
   viewer.initCameraParameters ();
 
   int msg_nr = 1;
@@ -91,10 +135,14 @@ int main (int argc, char** argv)
   while (!viewer.wasStopped()) {
     viewer.spinOnce(100);
 
-    if (sfm.updated) {
+    if (options.updated) {
       viewer.updatePointCloud(points, "points");
       viewer.updatePointCloud(poses, "poses"); 
-      sfm.updated = false;
+      if (options.lineDraw)
+        drawLines(viewer, sfm);
+      else
+        viewer.removeAllShapes();
+      options.updated = false;
     }
   }
 

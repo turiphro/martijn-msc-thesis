@@ -61,4 +61,13 @@
 ==========
 - Added camera pose view and point visibility view to sfmviewer
 
+2012/07/02
+==========
+- Added .out, .ply, .txt file formats to sfmreader
+- Created some more point cloud + visibility sets
+
+2012/07/03
+==========
+- Added line draw to sfmviewer
+- Read OctoMap paper
 

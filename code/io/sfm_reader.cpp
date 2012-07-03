@@ -23,7 +23,6 @@ SfMReader::SfMReader()
 SfMReader::SfMReader(string path)
 {
   this->path = path;
-  updated = false;
   read();
 }
 
@@ -413,7 +412,7 @@ bool SfMReader::readTXT()
         // add new point to point cloud
         float x,y,z;
         sline >> x >> y >> z;
-        points.push_back(PointXYZRGB(200,200,200));
+        points.push_back(PointXYZRGB(150,150,150));
         points.back().x = x;
         points.back().y = y;
         points.back().z = z;
@@ -487,13 +486,15 @@ bool SfMReader::selectPointsForCamera(int id,
   if (poses.size() < id)
     return false;
 
-  // colour points visible from given camera
+  // colour and save points visible from given camera
   resetPointColours();
+  line_ends.clear();
   for (int i=0; i<visible.size(); i++) {
     if (visible.at(i).find(id) != visible.at(i).end()) {
       points.at(i).r = colourSelectedPoint[2];
       points.at(i).g = colourSelectedPoint[1];
       points.at(i).b = colourSelectedPoint[0];
+      line_ends.push_back(&points.at(i));
     }
   }
 
@@ -508,6 +509,8 @@ bool SfMReader::selectPointsForCamera(int id,
   poses.at(id).r = colourSelectedCamera[2];
   poses.at(id).g = colourSelectedCamera[1];
   poses.at(id).b = colourSelectedCamera[0];
+  // save pointer to given camera
+  line_start = &poses.at(id);
 
   return true;
 }
@@ -521,11 +524,13 @@ bool SfMReader::selectCamerasForPoint(int id,
   if (points.size() < id)
     return false;
 
-  // colour point
+  // colour given point
   resetPointColours();
   points.at(id).r = colourSelectedPoint[2];
   points.at(id).g = colourSelectedPoint[1];
   points.at(id).b = colourSelectedPoint[0];
+  // save pointer to given point
+  line_start = &points.at(id);
 
   // colour all camera poses
   for (int i=0; i<poses.size(); i++) {
@@ -534,12 +539,8 @@ bool SfMReader::selectCamerasForPoint(int id,
     poses.at(i).b = colourCamera[0];
   }
 
-  if (visible.size() < id)
-    // no visibility info for this point
-    // (probably none at all)
-    return false;
-
-  // recolour poses for given point
+  // recolour and save poses for given point
+  line_ends.clear();
   map<int,visibility>* vismap = &visible.at(id);
   int frame;
   map<int,visibility>::iterator it;
@@ -548,6 +549,7 @@ bool SfMReader::selectCamerasForPoint(int id,
     poses.at(frame).r = colourSelectedCamera[2];
     poses.at(frame).g = colourSelectedCamera[1];
     poses.at(frame).b = colourSelectedCamera[0];
+    line_ends.push_back(&poses.at(frame));
   }
 
   return true;

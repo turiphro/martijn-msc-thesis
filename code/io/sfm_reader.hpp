@@ -47,8 +47,9 @@ class SfMReader
     PointCloud<PointXYZRGB> poses;
     vector<visualization::Camera> cameras;
     vector<map<int,visibility> > visible; 
+    PointXYZRGB* line_start;
+    vector<PointXYZRGB*> line_ends;
     //vector<io::ply::camera>
-    bool updated; // handy in visualizer
 
     SfMReader();
     SfMReader(string path);
