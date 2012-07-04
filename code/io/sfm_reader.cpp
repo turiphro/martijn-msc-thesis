@@ -542,8 +542,8 @@ bool SfMReader::selectCamerasForPoint(int id,
   // recolour and save poses for given point
   line_ends.clear();
   map<int,visibility>* vismap = &visible.at(id);
-  int frame;
   map<int,visibility>::iterator it;
+  int frame;
   for (it = vismap->begin(); it!=vismap->end(); it++) {
     frame = (*it).first;
     poses.at(frame).r = colourSelectedCamera[2];
@@ -572,3 +572,17 @@ void SfMReader::resetPointColours()
     }
   }
 }
+
+
+void SfMReader::getExtrema(Scalar& min, Scalar& max)
+{
+  PointXYZRGB min_pt, max_pt;
+  getMinMax3D(points, min_pt, max_pt);
+  min[0] = min_pt.x;
+  min[1] = min_pt.y;
+  min[2] = min_pt.z;
+  max[0] = max_pt.x;
+  max[1] = max_pt.y;
+  max[2] = max_pt.z;
+}
+

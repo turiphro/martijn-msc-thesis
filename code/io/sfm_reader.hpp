@@ -66,6 +66,7 @@ class SfMReader
                                Scalar colourSelectedPoint = Scalar(0,0,255));
 
     void resetPointColours();
+    void getExtrema(Scalar& min, Scalar& max);
 
 };
 

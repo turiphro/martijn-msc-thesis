@@ -7,6 +7,7 @@
 #include "../io/sfm_reader.hpp"
 
 using namespace std;
+using namespace pcl;
 
 
 void usage(char* name)
@@ -19,13 +20,13 @@ void usage(char* name)
 
 typedef struct {
   SfMReader* sfm;
-  pcl::visualization::PCLVisualizer* viewer;
+  visualization::PCLVisualizer* viewer;
   bool updated;
   bool lineDraw;
 } callbackObject;
 
 
-void pp_callback(const pcl::visualization::PointPickingEvent& event, void* options_ptr)
+void pp_callback(const visualization::PointPickingEvent& event, void* options_ptr)
 {
   callbackObject* options = (callbackObject*) options_ptr;
 
@@ -51,7 +52,7 @@ void pp_callback(const pcl::visualization::PointPickingEvent& event, void* optio
   options->updated = true;
 }
 
-void kb_callback(const pcl::visualization::KeyboardEvent& event, void* options_ptr)
+void kb_callback(const visualization::KeyboardEvent& event, void* options_ptr)
 {
   callbackObject* options = (callbackObject*) options_ptr;
 
@@ -77,7 +78,7 @@ void kb_callback(const pcl::visualization::KeyboardEvent& event, void* options_p
 
 /* drawing functions */
 
-void drawLines(pcl::visualization::PCLVisualizer& viewer, SfMReader& sfm, int maxLines = 250)
+void drawLines(visualization::PCLVisualizer& viewer, SfMReader& sfm, int maxLines = 250)
 {
   viewer.removeAllShapes();
   stringstream name("");
@@ -102,7 +103,7 @@ int main (int argc, char** argv)
     usage(argv[0]);
 
   SfMReader sfm(argv[1]);
-  pcl::visualization::PCLVisualizer viewer("Cloud viewer");
+  visualization::PCLVisualizer viewer("Cloud viewer");
 
   // set options
   callbackObject options;
@@ -111,8 +112,8 @@ int main (int argc, char** argv)
   options.updated = false;
   options.lineDraw = false;
 
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr points(&sfm.points);
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr poses(&sfm.poses);
+  PointCloud<PointXYZRGB>::Ptr points(&sfm.points);
+  PointCloud<PointXYZRGB>::Ptr poses(&sfm.poses);
 
   viewer.registerPointPickingCallback(pp_callback, &options);
   viewer.registerKeyboardCallback(kb_callback, &options);
