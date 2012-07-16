@@ -10,8 +10,8 @@ OccupancyGrid::OccupancyGrid(string path, int resolution)
   sfm->getExtrema(min, max);
   axes = max - min;
   max_axis_length = axes[0];
-  if (max(axes[1] > max_axis_length)) max_axis_length = axes[1];
-  if (max(axes[2] > max_axis_length)) max_axis_length = axes[2];
+  if (axes[1] > max_axis_length) max_axis_length = axes[1];
+  if (axes[2] > max_axis_length) max_axis_length = axes[2];
 
   tree = new OcTree(max_axis_length / resolution);
 }
@@ -21,7 +21,16 @@ OccupancyGrid::~OccupancyGrid()
   delete sfm;
 }
 
-bool OccupancyGrid::carve()
+/* General Carving function.
+ * If exportUnknowns is set to true, the final result will
+ * be altered such that the unknowns are set to occupied.
+ * If exportOccupied is set to false, the final result will
+ * be altered such that the occupied voxels are set to
+ * unknown.
+ */
+bool OccupancyGrid::carve(bool exportUnknowns,
+                          bool exportOccupied,
+                          int method)
 {
   if (sfm->poses.size() == 0) {
     cerr << "[!!] No camera poses known!" << endl;
@@ -32,6 +41,20 @@ bool OccupancyGrid::carve()
     return false;
   }
   
+  switch (method) {
+    case 0:
+      return carveSingleRay(exportUnknowns, exportOccupied);
+      break;
+    default:
+      cerr << "[!!] Error: unknown carving method (" << method << ")" << endl;
+      return false;
+  }
+
+}
+
+bool OccupancyGrid::carveSingleRay(bool exportUnknowns,
+                                   bool exportOccupied)
+{
   point3d origin, end;
   map<int,visibility>* vismap;
   map<int,visibility>::iterator it;
@@ -39,7 +62,6 @@ bool OccupancyGrid::carve()
   // for every point ..
   for (int p=0; p<sfm->points.size(); p++) {
     // .. carve for sequence of camera poses
-    // TODO: make something better than just carving rays
     vismap = &sfm->visible.at(p);
     for (it = vismap->begin(); it!=vismap->end(); it++) {
       frame = (*it).first;
@@ -48,6 +70,23 @@ bool OccupancyGrid::carve()
       tree->insertRay(origin, end);
     }
   }
+  // change unknowns or occupied voxels for desired output
+  if (exportUnknowns || !exportOccupied) {
+    // iterate through leaf nodes and alter state if necessary
+    for (OcTree::leaf_iterator it = tree->begin_leafs(),
+         end=tree->end_leafs(); it!=end; it++) {
+      if (exportUnknowns
+          && !tree->isNodeAtThreshold(*it)
+          && !tree->isNodeOccupied(*it)) {
+        it->setValue(tree->getOccupancyThresLog());
+      } else if (!exportOccupied
+          && tree->isNodeOccupied(*it)) {
+        it->setValue(tree->getOccupancyThresLog()-1); // TODO: rem hack
+      }
+
+    }
+  }
+  // update up-tree
   tree->updateInnerOccupancy();
   return true;
 }

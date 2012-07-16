@@ -46,7 +46,7 @@ void FeatureSequence::clearCache()
 int FeatureSequence::getNearestKeypoint(Point2f point, int position)
 {
   if (kp.at(position)->size()==0)
-    return NULL;
+    return -1;
 
   KeyPoint* nearest = &kp.at(position)->at(0);
   double d = norm(nearest->pt - point);
@@ -219,6 +219,8 @@ bool FeatureSequence::visualiseMatchesOf(int position1, int position2, Mat& outp
 
 void FeatureSequence::drawFlowVectors(Mat& output, vector<KeyPoint>* kp1, vector<KeyPoint>* kp2, vector<DMatch>* matches, int minDistance, Scalar colourMatches, Scalar colourSingles, bool redrawKeypoints, bool richDraw)
 {
+  // alternatively, use PCL's PCLHistogramVisualizer
+
   Point p1, p2;
   bool* inlier = new bool[kp2->size()];
   for (int i=0; i<kp2->size(); i++)

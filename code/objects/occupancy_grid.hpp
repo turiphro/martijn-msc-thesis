@@ -39,7 +39,11 @@ class OccupancyGrid
   public:
     OccupancyGrid(string path, int resolution=250);
     ~OccupancyGrid();
-    bool carve();
+    bool carve(bool exportUnknowns=false,
+               bool exportOccupied=true,
+               int method=0);
+    bool carveSingleRay(bool exportUnknowns=false,
+                        bool exportOccupied=true);
     bool save(string filename, bool binary=false);
     void pcl2octomap(PointXYZRGB& pcl, point3d& octomap);
     void octomap2pcl(point3d& octomap, PointXYZRGB& pcl);

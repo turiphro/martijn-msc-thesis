@@ -49,7 +49,7 @@ bool SfMReader::read(string path)
     this->path = path;
 
   // call appropiate function for file extension
-  string ext = path.substr(path.find_last_of(".") + 1);
+  ext = path.substr(path.find_last_of(".") + 1);
 
   if (ext == "nvm")
     return readNVM(); // VisualSFM 
@@ -91,6 +91,7 @@ bool SfMReader::readNVM()
     getline(file, line);
     stringstream sline(line);
     string filename;
+    Mat q(4, 1, CV_64FC1);
     switch (state) {
       case 0: // header
         if (integerLine(line, 1)) {
@@ -108,18 +109,23 @@ bool SfMReader::readNVM()
         double fx,fy,fz;    // focal: lookat
         double vx,vy,vz;    // view: up vector
         double fovy;        // fovy: FoV in y direction
-        double focal_l, q1,q2,q3,q4, radial_dist;
-        sline >> filename >> focal_l >> q1>>q2>>q3>>q4 >> cx >> cy >> cz >> radial_dist;
-        // TODO: convert quaternion to focal look-at
-        //       solve later on (may want to use io::ply::camera;
-        //       some compile errors, library broken)
-        // visualization::Camera can easily be used to set the visualizer view
+        double focal, q1,q2,q3,q4, radial;
+        sline >> filename >> focal >> q1>>q2>>q3>>q4 >> cx >> cy >> cz >> radial;
+        q.at<double>(0) = q1; q.at<double>(1) = q2;
+        q.at<double>(2) = q3; q.at<double>(3) = q4;
 
         // add new camera to list of cameras
-        cameras.push_back(visualization::Camera());
-        cameras.back().pos[0] = cx;
-        cameras.back().pos[1] = cy;
-        cameras.back().pos[2] = cz;
+        cameras.push_back(camera());
+        cameras.back().t = Mat(3, 1, CV_64FC1);
+        cameras.back().t.at<double>(0) = cx;
+        cameras.back().t.at<double>(1) = cy;
+        cameras.back().t.at<double>(2) = cz;
+        cameras.back().R = Mat(3, 3, CV_64FC1);
+        quaternion2matrix(q, cameras.back().R);
+        cameras.back().focal = focal;
+        cameras.back().radial[0] = radial;
+        cameras.back().radial[1] = 0;
+        image_filenames.push_back(filename);
         // also add camera pose to poses point cloud:
         poses.push_back(PointXYZRGB(255,255,0));
         poses.back().x = cx;
@@ -212,29 +218,41 @@ bool SfMReader::readOUT()
         } else {
           // new camera
           double cx, cy, cz;  // pos: position
-          double focal_l, r11,r12,r13,r21,r22,r23,r31,r32,r33;
-          double radial_dist1, radial_dist2;
-          sline >> focal_l >> radial_dist1 >> radial_dist2;
+          double focal, r00,r01,r02,r10,r11,r12,r20,r21,r22;
+          double radial1, radial2;
+          sline >> focal >> radial1 >> radial2;
           getline(file, line);
           sline.str(line);
-          sline >> r11 >> r21 >> r31;
+          sline >> r00 >> r10 >> r20;
           getline(file, line);
           sline.str(line);
-          sline >> r12 >> r22 >> r32;
+          sline >> r01 >> r11 >> r21;
           getline(file, line);
           sline.str(line);
-          sline >> r13 >> r23 >> r33;
+          sline >> r02 >> r12 >> r22;
           getline(file, line);
           sline.str(line);
           sline >> cx >> cy >> cz;
-          // TODO: convert rotation to focal look-at
-          // visualization::Camera can easily be used to set the visualizer view
 
           // add new camera to list of cameras
-          cameras.push_back(visualization::Camera());
-          cameras.back().pos[0] = cx;
-          cameras.back().pos[1] = cy;
-          cameras.back().pos[2] = cz;
+          cameras.push_back(camera());
+          cameras.back().t = Mat(3, 1, CV_64FC1);
+          cameras.back().t.at<double>(0) = cx;
+          cameras.back().t.at<double>(1) = cy;
+          cameras.back().t.at<double>(2) = cz;
+          cameras.back().R = Mat(3, 1, CV_64FC1);
+          cameras.back().R.at<double>(0,0) = r00;
+          cameras.back().R.at<double>(0,1) = r01;
+          cameras.back().R.at<double>(0,2) = r02;
+          cameras.back().R.at<double>(1,0) = r10;
+          cameras.back().R.at<double>(1,1) = r11;
+          cameras.back().R.at<double>(1,2) = r12;
+          cameras.back().R.at<double>(2,0) = r20;
+          cameras.back().R.at<double>(2,1) = r21;
+          cameras.back().R.at<double>(2,2) = r22;
+          cameras.back().focal = focal;
+          cameras.back().radial[0] = radial1;
+          cameras.back().radial[1] = radial2;
           // also add camera pose to poses point cloud:
           poses.push_back(PointXYZRGB(255,255,0));
           poses.back().x = cx;
@@ -388,10 +406,12 @@ bool SfMReader::readTXT()
         // TODO: convert and use other variables
 
         // add new camera to list of cameras
+        /*
         cameras.push_back(visualization::Camera());
         cameras.back().pos[0] = cx;
         cameras.back().pos[1] = cy;
         cameras.back().pos[2] = cz;
+        */
         // also add camera pose to poses point cloud:
         poses.push_back(PointXYZRGB(255,255,0));
         poses.back().x = cx;
@@ -437,7 +457,7 @@ bool SfMReader::readPCD()
    *  http://pointclouds.org/documentation/tutorials/pcd_file_format.php
    */
 
-  // pcl::PCDReader?
+  // TODO: pcl::PCDReader?
 
   cout << "TODO: readPCD" << endl;
   return false;
@@ -489,12 +509,16 @@ bool SfMReader::selectPointsForCamera(int id,
   // colour and save points visible from given camera
   resetPointColours();
   line_ends.clear();
+  curr_visible_keypoints.clear();
+  points_curr_visibility.clear();
   for (int i=0; i<visible.size(); i++) {
-    if (visible.at(i).find(id) != visible.at(i).end()) {
+    points_curr_visibility.push_back( visible.at(i).find(id) != visible.at(i).end() );
+    if (points_curr_visibility.back()) {
       points.at(i).r = colourSelectedPoint[2];
       points.at(i).g = colourSelectedPoint[1];
       points.at(i).b = colourSelectedPoint[0];
       line_ends.push_back(&points.at(i));
+      curr_visible_keypoints.push_back(&visible.at(i).find(id)->second);
     }
   }
 
@@ -541,6 +565,8 @@ bool SfMReader::selectCamerasForPoint(int id,
 
   // recolour and save poses for given point
   line_ends.clear();
+  curr_visible_keypoints.clear();
+  points_curr_visibility.clear();
   map<int,visibility>* vismap = &visible.at(id);
   map<int,visibility>::iterator it;
   int frame;
@@ -586,3 +612,46 @@ void SfMReader::getExtrema(Scalar& min, Scalar& max)
   max[2] = max_pt.z;
 }
 
+/* reprojects point using camera parameters
+ * note: this will return the undistorted location
+ * (re-distort before displaying in an image)
+ */
+void SfMReader::reproject(PointXYZRGB* point, camera cam, PointXYZRGB* projected)
+{
+  Mat K = Mat::zeros(3, 3, CV_64FC1);
+  K.at<double>(0,0) = cam.focal;
+  K.at<double>(1,1) = cam.focal;
+  K.at<double>(2,2) = 1;
+  Mat v(3, 1, CV_64FC1);
+  Mat x(3, 1, CV_64FC1);
+  x.at<double>(0) = point->x;
+  x.at<double>(1) = point->y;
+  x.at<double>(2) = point->z;
+  v = K * cam.R * (x - cam.t);
+  projected->x = v.at<double>(0)/v.at<double>(2);
+  projected->y = v.at<double>(1)/v.at<double>(2);
+  projected->z = 0;
+  projected->r = point->r;
+  projected->g = point->g;
+  projected->b = point->b;
+}
+
+
+void SfMReader::quaternion2matrix(Mat& q, Mat& R)
+{
+  double a = q.at<double>(0);
+  double b = q.at<double>(1);
+  double c = q.at<double>(2);
+  double d = q.at<double>(3);
+  // conversion based on the description on
+  // http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Conversion_to_and_from_the_matrix_representation
+  R.at<double>(0,0) = a*a + b*b - c*c - d*d;
+  R.at<double>(1,0) = 2*b*c + 2*a*d;
+  R.at<double>(2,0) = 2*b*d - 2*a*c;
+  R.at<double>(0,1) = 2*b*c - 2*a*d;
+  R.at<double>(1,1) = a*a - b*b + c*c - d*d;
+  R.at<double>(2,1) = 2*c*d + 2*a*b;
+  R.at<double>(0,2) = 2*b*d + 2*a*c;
+  R.at<double>(1,2) = 2*c*d - 2*a*b;
+  R.at<double>(2,2) = a*a - b*b - c*c + d*d;
+}

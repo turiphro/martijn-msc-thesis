@@ -70,5 +70,34 @@
 ==========
 - Added line draw to sfmviewer
 - Read OctoMap paper
-- Made simple sfmcarver
+- Made simple sfmcarver (carveSingleRay)
+
+2012/07/05
+==========
+- (PGM meeting; demo)
+- Worked on sfmviewer
+
+2012/07/06
+==========
+- Added image viewing window to sfmviewer
+
+2012/07/08
+==========
+- Fixed order problem of image viewing window
+
+2012/07/09
+==========
+- Added exportUnknowns option to carveSingleRay;
+  it is now possible to visualize the uncarved voxels
+
+2012/07/10
+==========
+- Worked on reprojection of points in sfmviewer;
+  still incorrect (problem with quaternion?)
+
+2012/07/16
+==========
+- Fixed reprojection errors (need to use inverse of translation),
+  Finished feature reprojection in image viewing window
+  (including redistortion of reprojected points).
 

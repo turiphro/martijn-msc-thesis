@@ -20,7 +20,7 @@ class SequenceCapture
   private:
     VideoCapture* videoCapture;
     string path;
-    vector<string> images;
+    vector<string> images; // for directory with images only
     int position;
     enum {CAMERA, VIDEO, IMAGES} type;
     
@@ -34,6 +34,7 @@ class SequenceCapture
     bool read(Mat& image);
     SequenceCapture& operator>>(Mat& image);
     bool setPosition(int position);
+    bool setPosition(string filename); // for directory with images only
     int  getPosition();
     int  getFrameCount();
     

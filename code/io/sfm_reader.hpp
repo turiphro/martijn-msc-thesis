@@ -29,6 +29,14 @@ typedef struct visibility
   double y;
 } visibility;
 
+typedef struct camera
+{
+  Mat R;
+  Mat t;
+  double focal;
+  double radial[2];
+} camera;
+
 class SfMReader
 {
 
@@ -43,13 +51,24 @@ class SfMReader
     bool integerLine(string line, int count=1);
 
   public:
+    string ext; // file type
     PointCloud<PointXYZRGB> points, points_original;
     PointCloud<PointXYZRGB> poses;
-    vector<visualization::Camera> cameras;
+    vector<camera> cameras;
     vector<map<int,visibility> > visible; 
     PointXYZRGB* line_start;
     vector<PointXYZRGB*> line_ends;
-    //vector<io::ply::camera>
+    vector<visibility*> curr_visible_keypoints;
+    vector<bool> points_curr_visibility;
+    vector<string> image_filenames; // used for nvm only
+
+    /* TODO: change camera representation?
+     * Possible representations:
+     * - visualization::Camera  f, t,    fovy, lookat, up
+     *    \_ has nice cvtWindowCoordinates function
+     * - io::ply::camera        
+     * - CameraParams           f, t, R, ratio, ppx, ppy
+     */
 
     SfMReader();
     SfMReader(string path);
@@ -67,6 +86,8 @@ class SfMReader
 
     void resetPointColours();
     void getExtrema(Scalar& min, Scalar& max);
+    void reproject(PointXYZRGB* point, camera cam, PointXYZRGB* projected);
+    void quaternion2matrix(Mat& q, Mat& R);
 
 };
 

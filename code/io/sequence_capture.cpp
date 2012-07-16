@@ -79,7 +79,7 @@ bool SequenceCapture::read(Mat& image)
    case VIDEO:
     return videoCapture->read(image);
    case IMAGES:
-    if (position == images.size())
+    if (position >= images.size())
       return false;
     image = imread(path + "/" + images.at(position++));
     return (image.data!=NULL);
@@ -109,6 +109,21 @@ bool SequenceCapture::setPosition(int position)
     return true;
   }
 
+}
+
+bool SequenceCapture::setPosition(string filename)
+{
+  if (type != IMAGES) {
+    cerr << "[!!] Error: this sequence is not based on an image directory" << endl;
+    return false;
+  }
+
+  for (int i=0; i<images.size(); i++)
+    if (images[i] == filename)
+      return setPosition(i);
+
+  cerr << "[!!] Filename " << filename << " not found in image directory (" << path << "): " << endl;
+  return false;
 }
 
 int SequenceCapture::getPosition()
