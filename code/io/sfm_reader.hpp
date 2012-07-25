@@ -17,6 +17,7 @@
 //#include <pcl/io/ply_io.h>
 #include <pcl/visualization/common/common.h>
 
+#include "sequence_capture.hpp"
 
 using namespace std;
 using namespace pcl;
@@ -42,6 +43,8 @@ class SfMReader
 
   private:
     string path;
+    string imagespath;
+    Size window_size;
 
     bool readNVM();
     bool readOUT();
@@ -71,10 +74,11 @@ class SfMReader
      */
 
     SfMReader();
-    SfMReader(string path);
+    SfMReader(string path, string imagespath="");
     ~SfMReader();
     bool read();
     bool read(string path);
+    void getWindowSize(Size& size);
     bool selectPointsForCamera(int id,
                                Scalar colourCamera = Scalar(0,255,255),
                                Scalar colourSelectedCamera = Scalar(0,0,255),
@@ -86,7 +90,9 @@ class SfMReader
 
     void resetPointColours();
     void getExtrema(Scalar& min, Scalar& max);
-    void reproject(PointXYZRGB* point, camera cam, PointXYZRGB* projected);
+    void reproject(PointXYZRGB* point, camera* cam, PointXYZRGB* projected);
+    bool reprojectsInsideImage(int pointID, int camID, Size size);
+    bool reprojectsInsideImage(PointXYZRGB* point, camera* cam, Size size);
     void quaternion2matrix(Mat& q, Mat& R);
 
 };

@@ -37,16 +37,20 @@ class OccupancyGrid
     SfMReader* sfm;
 
   public:
-    OccupancyGrid(string path, int resolution=250);
+    OccupancyGrid(string path, string imagespath="", int resolution=250);
     ~OccupancyGrid();
     bool carve(bool exportUnknowns=false,
                bool exportOccupied=true,
-               int method=0);
-    bool carveSingleRay(bool exportUnknowns=false,
+               int method=0,
+               double param1=0.1);
+    bool carveSingleRay(double ignoredBorderSize=0.1,
+                        bool exportUnknowns=false,
                         bool exportOccupied=true);
+    bool carveSingleRayInvisible(double occluderProbAddition=0.1,
+                                 bool exportOccupied=true);
     bool save(string filename, bool binary=false);
-    void pcl2octomap(PointXYZRGB& pcl, point3d& octomap);
-    void octomap2pcl(point3d& octomap, PointXYZRGB& pcl);
+    void pcl2octomap(PointXYZRGB pcl, point3d& octomap);
+    void octomap2pcl(point3d octomap, PointXYZRGB& pcl);
 
 };
 

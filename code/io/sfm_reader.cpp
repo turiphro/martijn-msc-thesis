@@ -20,9 +20,11 @@ SfMReader::SfMReader()
   SfMReader("");
 }
 
-SfMReader::SfMReader(string path)
+SfMReader::SfMReader(string path, string imagespath)
 {
   this->path = path;
+  this->imagespath = imagespath;
+  window_size = Size(0,0);
   read();
 }
 
@@ -117,9 +119,10 @@ bool SfMReader::readNVM()
         // add new camera to list of cameras
         cameras.push_back(camera());
         cameras.back().t = Mat(3, 1, CV_64FC1);
-        cameras.back().t.at<double>(0) = cx;
-        cameras.back().t.at<double>(1) = cy;
-        cameras.back().t.at<double>(2) = cz;
+        // apparently, t = -1 * t in nvm; we need to correct this:
+        cameras.back().t.at<double>(0) = -1 * cx;
+        cameras.back().t.at<double>(1) = -1 * cy;
+        cameras.back().t.at<double>(2) = -1 * cz;
         cameras.back().R = Mat(3, 3, CV_64FC1);
         quaternion2matrix(q, cameras.back().R);
         cameras.back().focal = focal;
@@ -240,7 +243,7 @@ bool SfMReader::readOUT()
           cameras.back().t.at<double>(0) = cx;
           cameras.back().t.at<double>(1) = cy;
           cameras.back().t.at<double>(2) = cz;
-          cameras.back().R = Mat(3, 1, CV_64FC1);
+          cameras.back().R = Mat(3, 3, CV_64FC1);
           cameras.back().R.at<double>(0,0) = r00;
           cameras.back().R.at<double>(0,1) = r01;
           cameras.back().R.at<double>(0,2) = r02;
@@ -463,6 +466,27 @@ bool SfMReader::readPCD()
   return false;
 }
 
+/* this getter is used to prevent SfMReader from using
+ * the slow SequenceCapture for calculating the window size
+ * only, unless strictly necessary
+ */
+void SfMReader::getWindowSize(Size& size)
+{
+  if (this->window_size.width == 0) {
+    // determine window size
+    if (imagespath == "") {
+      cerr << "[!!] Error: no image path specified for SfMReader::getWindowSize" << endl;
+      return;
+    }
+    Mat frame;
+    SequenceCapture sq(imagespath);
+    sq.read(frame);
+    this->window_size = frame.size();
+  }
+  // set window size
+  size = this->window_size;
+}
+
 bool SfMReader::integerLine(string line, int count)
 {
   int number = 0;
@@ -616,24 +640,49 @@ void SfMReader::getExtrema(Scalar& min, Scalar& max)
  * note: this will return the undistorted location
  * (re-distort before displaying in an image)
  */
-void SfMReader::reproject(PointXYZRGB* point, camera cam, PointXYZRGB* projected)
+void SfMReader::reproject(PointXYZRGB* point, camera* cam, PointXYZRGB* projected)
 {
   Mat K = Mat::zeros(3, 3, CV_64FC1);
-  K.at<double>(0,0) = cam.focal;
-  K.at<double>(1,1) = cam.focal;
+  K.at<double>(0,0) = cam->focal;
+  K.at<double>(1,1) = cam->focal;
   K.at<double>(2,2) = 1;
   Mat v(3, 1, CV_64FC1);
   Mat x(3, 1, CV_64FC1);
   x.at<double>(0) = point->x;
   x.at<double>(1) = point->y;
   x.at<double>(2) = point->z;
-  v = K * cam.R * (x - cam.t);
+  v = K * cam->R * (x + cam->t);
   projected->x = v.at<double>(0)/v.at<double>(2);
   projected->y = v.at<double>(1)/v.at<double>(2);
   projected->z = 0;
   projected->r = point->r;
   projected->g = point->g;
   projected->b = point->b;
+}
+
+bool SfMReader::reprojectsInsideImage(int pointID, int camID, Size size)
+{
+  if (pointID<0 || pointID>=points.size()
+    || camID<0 || camID>=cameras.size()) {
+    cerr << "[!!] Error: invalid pointID or camID (in SfMReader::reprojectsInsideImage)" << endl;
+    return false;
+  }
+
+  // TODO: would be nicer to find size ourselves
+
+  return reprojectsInsideImage(&points.at(pointID),
+                               &cameras.at(camID),
+                               size);
+}
+
+bool SfMReader::reprojectsInsideImage(PointXYZRGB* point, camera* cam, Size size)
+{
+  PointXYZRGB projected;
+  reproject(point, cam, &projected);
+  return (projected.x >= size.width/-2.0
+       && projected.x <= size.width/2.0
+       && projected.y >= size.height/-2.0
+       && projected.y <= size.height/2.0);
 }
 
 

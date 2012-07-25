@@ -22,7 +22,7 @@ SequenceCapture::SequenceCapture(string path)
     type = IMAGES;
     this->path = path;
     position = 0;
-    images = vector<string>();
+    images.clear();
     struct dirent *dirstruct;
     DIR* dp = opendir(path.c_str());
     string d_name;
@@ -50,7 +50,6 @@ SequenceCapture::~SequenceCapture()
     videoCapture->release();
     break;
    case IMAGES:
-    delete &images;
     break;
   }
 }

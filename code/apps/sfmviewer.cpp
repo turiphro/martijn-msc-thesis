@@ -45,6 +45,7 @@ void distortPointR1(double x, double y, double k1, double& dx, double& dy) {
   if (k1 == 0) {
     dx = x;
     dy = y;
+    return;
   }
      
   const double t2 = y*y; 
@@ -139,7 +140,7 @@ void showCameraView(callbackObject* options, string window_name)
          */
         mx += s.width/2.0;
         my += s.height/2.0;
-        circle(frame, Point(mx, my), 3, Scalar(255,100,0), 2);
+        circle(frame, Point(mx, my), 2, Scalar(255,100,0), 2);
       }
 
       // draw reprojected keypoints
@@ -149,7 +150,7 @@ void showCameraView(callbackObject* options, string window_name)
       double x, y, gamma;
       for (int i=0; i<options->sfm->points.size(); i++) {
         options->sfm->reproject(&options->sfm->points.at(i),
-                                options->sfm->cameras.at(options->camID),
+                                &options->sfm->cameras.at(options->camID),
                                 &projected);
         // redo distortion for reprojected keypoints
         gamma = options->sfm->cameras.at(options->camID).focal;
@@ -163,10 +164,10 @@ void showCameraView(callbackObject* options, string window_name)
 
         if (x > 0 && x < s.width && y > 0 && y < s.height) {
           if (options->sfm->points_curr_visibility.at(i)) {
-            circle(frame, Point(x, y), 5, Scalar(0,255,0), 2);
+            circle(frame, Point(x, y), 3, Scalar(0,255,0), 2);
             visible_in++;
           } else {
-            circle(frame, Point(x, y), 2, Scalar(0,0,255), 1);
+            circle(frame, Point(x, y), 3, Scalar(0,0,255), 1);
             invisible_in++;
           }
         } else {

@@ -97,7 +97,26 @@
 
 2012/07/16
 ==========
-- Fixed reprojection errors (need to use inverse of translation),
+- Fixed reprojection errors (need to subtract translation),
   Finished feature reprojection in image viewing window
-  (including redistortion of reprojected points).
+  (including redistortion of reprojected points);
+  now visualising both visible and invisible points.
+
+2012/07/17
+==========
+- Updated README.txt
+- Worked on carveSingeRayInvisible
+
+2012/07/19
+==========
+- (PGM meeting)
+- Worked on carveSingeRayInvisible
+
+2012/07/24
+==========
+- Made overview of project (lifewiki)
+- Finished carveSingeRayInvisible
+  One parameter: occluderProbAddition;
+  does give reasonable results, but also lots of non-occluder
+  voxels for unstable points.  
 
