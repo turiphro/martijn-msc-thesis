@@ -42,9 +42,6 @@ class SfMReader
 {
 
   private:
-    string path;
-    string imagespath;
-    Size window_size;
 
     bool readNVM();
     bool readOUT();
@@ -54,7 +51,11 @@ class SfMReader
     bool integerLine(string line, int count=1);
 
   public:
+    string path;
+    string imagespath;
+    Size window_size;
     string ext; // file type
+    SequenceCapture* sc;
     PointCloud<PointXYZRGB> points, points_original;
     PointCloud<PointXYZRGB> poses;
     vector<camera> cameras;
@@ -62,7 +63,8 @@ class SfMReader
     PointXYZRGB* line_start;
     vector<PointXYZRGB*> line_ends;
     vector<visibility*> curr_visible_keypoints;
-    vector<bool> points_curr_visibility;
+    vector<bool> points_curr_visible;
+    vector<bool> points_curr_invisible;
     vector<string> image_filenames; // used for nvm only
 
     /* TODO: change camera representation?
@@ -79,20 +81,24 @@ class SfMReader
     bool read();
     bool read(string path);
     void getWindowSize(Size& size);
+    int getImageID(string filename);
     bool selectPointsForCamera(int id,
                                Scalar colourCamera = Scalar(0,255,255),
                                Scalar colourSelectedCamera = Scalar(0,0,255),
-                               Scalar colourSelectedPoint = Scalar(0,0,255));
+                               Scalar colourVisiblePoint = Scalar(0,255,0),
+                               Scalar colourInvisiblePoint = Scalar(0,0,255),
+                               bool calcInvisible=true);
     bool selectCamerasForPoint(int id,
                                Scalar colourCamera = Scalar(0,255,255),
                                Scalar colourSelectedCamera = Scalar(0,0,255),
-                               Scalar colourSelectedPoint = Scalar(0,0,255));
+                               Scalar colourSelectedPoint = Scalar(0,255,0));
 
     void resetPointColours();
     void getExtrema(Scalar& min, Scalar& max);
     void reproject(PointXYZRGB* point, camera* cam, PointXYZRGB* projected);
-    bool reprojectsInsideImage(int pointID, int camID, Size size);
-    bool reprojectsInsideImage(PointXYZRGB* point, camera* cam, Size size);
+    bool reprojectsInsideImage(int pointID, int camID, Size size, PointXYZRGB* projected=NULL);
+    bool reprojectsInsideImage(PointXYZRGB* point, camera* cam, Size size, PointXYZRGB* projected=NULL);
+    void distortPointR1(PointXYZRGB* point, camera* cam);
     void quaternion2matrix(Mat& q, Mat& R);
 
 };

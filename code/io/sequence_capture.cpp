@@ -25,14 +25,16 @@ SequenceCapture::SequenceCapture(string path)
     images.clear();
     struct dirent *dirstruct;
     DIR* dp = opendir(path.c_str());
-    string d_name;
+    string d_name, ext;
     while ((dirstruct = readdir(dp)) != NULL) {
       d_name = string(dirstruct->d_name);
-      // check if valid image with opencv function imread (slow!)
-      Mat m = imread(path + "/" + d_name);
-      if (m.data!=NULL) {
+      // check if valid image (simply check the extension)
+      ext = d_name.substr(d_name.find_last_of(".") + 1);
+      boost::algorithm::to_lower(ext);
+      // more than these can be supported; see
+      // http://opencv.willowgarage.com/documentation/cpp/reading_and_writing_images_and_video.html#cv-imread
+      if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
         images.push_back(d_name);
-      }
     }
     closedir(dp);
     sort(images.begin(), images.end());
@@ -117,6 +119,12 @@ bool SequenceCapture::setPosition(string filename)
     return false;
   }
 
+  // remove directory names
+  size_t found = filename.find_last_of("/\\");
+  if (found != string::npos)
+    filename = filename.substr(found+1);
+
+  // search filename
   for (int i=0; i<images.size(); i++)
     if (images[i] == filename)
       return setPosition(i);

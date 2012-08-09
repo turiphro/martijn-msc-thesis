@@ -25,20 +25,34 @@
 #include <octomap/OcTree.h>
 #include <opencv2/core/core.hpp>
 #include "../io/sfm_reader.hpp"
+#include "../io/sequence_capture.hpp"
+#include "../objects/listhelpers.cpp"
 
 using namespace std;
 using namespace pcl;
 using namespace octomap;
 
+
+typedef struct projected_voxel
+{
+  double x, y;
+  double r;
+  double distance;
+  
+} projected_voxel;
+
+
+bool projected_voxel_comp(projected_voxel a, projected_voxel b);
+
 class OccupancyGrid
 {
-  private:
+  public:
     OcTree* tree;
     SfMReader* sfm;
 
-  public:
     OccupancyGrid(string path, string imagespath="", int resolution=250);
     ~OccupancyGrid();
+    bool load(string path);
     bool carve(bool exportUnknowns=false,
                bool exportOccupied=true,
                int method=0,
@@ -49,8 +63,32 @@ class OccupancyGrid
     bool carveSingleRayInvisible(double occluderProbAddition=0.1,
                                  bool exportOccupied=true);
     bool save(string filename, bool binary=false);
+    void graphcut(double gamma=0.5);
+    void extentVisibilityLists(double threshold=0.2);
+    double reprojectMatch(Mat* img1, Mat* img2, 
+                          camera* cam1, camera* cam2,
+                          PointXYZRGB point,
+                          PointXYZRGB pose,
+                          double voxel_size,
+                          string method="L2",
+                          bool showImgs=false);
+    double patchDistance(Mat* patch1, Mat* patch2, string method="L2");
+    void projectVoxel(PointXYZRGB* point,
+                      double voxel_size, camera* cam,
+                      PointXYZRGB* centre, double* r);
+
     void pcl2octomap(PointXYZRGB pcl, point3d& octomap);
     void octomap2pcl(point3d octomap, PointXYZRGB& pcl);
+
+    void visualise(Mat& output, camera* cam,
+                   bool redraw=true,
+                   string method="circle", double alpha=0.5);
+    bool visualisePose(Mat& output, int poseID,
+                       string method="circle", double alpha=0.5);
+    void visualisePath(vector<Mat>* output,
+                       string method="circle", double alpha=0.5);
+    void visualisePath(vector<Mat>* output, vector<camera>* path,
+                       string method="circle", double alpha=0.5);
 
 };
 

@@ -120,3 +120,44 @@
   does give reasonable results, but also lots of non-occluder
   voxels for unstable points.  
 
+2012/07/25
+==========
+- Upgraded PCL to 1.6
+- Worked on extentVisibilityLists
+
+2012/07/26
+==========
+- (PGM meeting)
+- Made sainsbury's datasets
+- Played with sainsbury's datasets
+
+2012/07/30
+==========
+- Worked on extentVisibilityLists
+
+2012/07/31
+==========
+- Wrote down possible report structure
+
+2012/08/01
+==========
+- Finished extentVisibilityLists
+
+2012/08/02
+==========
+- (PGM meeting + meeting gabriel)
+
+2012/08/06
+==========
+- worked on OccupancyGrid::visualise (plot voxels in image)
+
+2012/08/07
+==========
+- worked on OccupancyGrid::visualise functions
+- compiled LearnedOcclusions for lampposts dataset (took 3 days)
+
+2012/08/08
+==========
+- Finished octogrid visualisation functions
+- Made carveviewer interface
+

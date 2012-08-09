@@ -35,65 +35,22 @@ typedef struct {
 } callbackObject;
 
 
-/* helper functions */
-
-/* Distort point x, y using one distortion parameter.
- * Code for this function is shamelessly copy-pasted from:
- * https://groups.google.com/forum/#!msg/vsfm/IcbdIVv_Uek/Us32SB
- */
-void distortPointR1(double x, double y, double k1, double& dx, double& dy) { 
-  if (k1 == 0) {
-    dx = x;
-    dy = y;
-    return;
-  }
-     
-  const double t2 = y*y; 
-  const double t3 = t2*t2*t2; 
-  const double t4 = x*x; 
-  const double t7 = k1*(t2+t4); 
-  if (k1 > 0) { 
-    const double t8 = 1.0/t7; 
-    const double t10 = t3/(t7*t7); 
-    const double t14 = sqrt(t10*(0.25+t8/27.0)); 
-    const double t15 = t2*t8*y*0.5; 
-    const double t17 = pow(t14+t15,1.0/3.0); 
-    const double t18 = t17-t2*t8/(t17*3.0); 
-    dx = t18*x/y;
-    dy = t18; 
-  } else { 
-    const double t9 = t3/(t7*t7*4.0); 
-    const double t11 = t3/(t7*t7*t7*27.0); 
-    const std::complex<double> t12 = t9+t11; 
-    const std::complex<double> t13 = sqrt(t12); 
-    const double t14 = t2/t7; 
-    const double t15 = t14*y*0.5; 
-    const std::complex<double> t16 = t13+t15; 
-    const std::complex<double> t17 = pow(t16,1.0/3.0); 
-    const std::complex<double> t18 = (t17+t14/ 
-(t17*3.0))*std::complex<double>(0.0,sqrt(3.0)); 
-    const std::complex<double> t19 = -0.5*(t17+t18)+t14/(t17*6.0); 
-    dx = t19.real()*x/y;
-    dy = t19.real();
-  } 
-} 
-
 /* drawing functions */
 
-void drawLines(visualization::PCLVisualizer& viewer, SfMReader& sfm, int maxLines = 250)
+void drawLines(visualization::PCLVisualizer& viewer, SfMReader* sfm, int maxLines = 250)
 {
   // TODO: faster drawing: http://stackoverflow.com/questions/2140796/draw-a-multiple-lines-set-with-vtk
 
   viewer.removeAllShapes();
   stringstream name("");
-  if (sfm.line_ends.size() > maxLines) {
-    cout << "Too many lines (" << sfm.line_ends.size() << ") to draw! ";
+  if (sfm->line_ends.size() > maxLines) {
+    cout << "Too many lines (" << sfm->line_ends.size() << ") to draw! ";
     cout << "Only drawing first " << maxLines << " lines." << endl;
   }
-  for (int i=0; i<min((int)sfm.line_ends.size(), maxLines); i++) {
+  for (int i=0; i<min((int)sfm->line_ends.size(), maxLines); i++) {
     name.str("line");
     name << i;
-    viewer.addLine(*sfm.line_start, *sfm.line_ends.at(i), 0,1,0, name.str());
+    viewer.addLine(*sfm->line_start, *sfm->line_ends.at(i), 0,1,0, name.str());
   }
 }
 
@@ -114,9 +71,6 @@ void showCameraView(callbackObject* options, string window_name)
          * here and in the used classes.
          */
         string img_filename = options->sfm->image_filenames.at(options->camID);
-        size_t found = img_filename.find_last_of("/\\");
-        if (found != string::npos)
-          img_filename = img_filename.substr(found+1);
         options->sc->setPosition(img_filename);
       } else {
         // all other formats are fine
@@ -154,16 +108,12 @@ void showCameraView(callbackObject* options, string window_name)
                                 &projected);
         // redo distortion for reprojected keypoints
         gamma = options->sfm->cameras.at(options->camID).focal;
-        distortPointR1(projected.x/gamma,
-                       projected.y/gamma,
-                       options->sfm->cameras.at(options->camID).radial[0],
-                       x,
-                       y);
-        x = x*gamma + s.width/2.0;
-        y = y*gamma + s.height/2.0;
+        options->sfm->distortPointR1(&projected, &options->sfm->cameras.at(options->camID));
+        x = projected.x + s.width/2.0;
+        y = projected.y + s.height/2.0;
 
         if (x > 0 && x < s.width && y > 0 && y < s.height) {
-          if (options->sfm->points_curr_visibility.at(i)) {
+          if (options->sfm->points_curr_visible.at(i)) {
             circle(frame, Point(x, y), 3, Scalar(0,255,0), 2);
             visible_in++;
           } else {
@@ -171,7 +121,7 @@ void showCameraView(callbackObject* options, string window_name)
             invisible_in++;
           }
         } else {
-          if (options->sfm->points_curr_visibility.at(i)) {
+          if (options->sfm->points_curr_visible.at(i)) {
             visible_out++;
           } else {
             invisible_out++;
@@ -327,12 +277,16 @@ int main (int argc, char** argv)
   if (argc==1)
     usage(argv[0]);
 
-  SfMReader sfm(argv[1]);
+  SfMReader* sfm;
+  if (argc==2)
+    sfm = new SfMReader(argv[1]);
+  else
+    sfm = new SfMReader(argv[1], argv[2]);
   visualization::PCLVisualizer viewer("Cloud viewer");
 
   // set options
   callbackObject options;
-  options.sfm = &sfm;
+  options.sfm = sfm;
   options.viewer = &viewer;
   options.updated = false;
   options.camID = -1;
@@ -341,8 +295,8 @@ int main (int argc, char** argv)
   options.cameraWindow = false;
   options.sc = (argc>=3) ? new SequenceCapture(argv[2]) : NULL;
 
-  PointCloud<PointXYZRGB>::Ptr points(&sfm.points);
-  PointCloud<PointXYZRGB>::Ptr poses(&sfm.poses);
+  PointCloud<PointXYZRGB>::Ptr points(&sfm->points);
+  PointCloud<PointXYZRGB>::Ptr poses(&sfm->poses);
 
   viewer.registerPointPickingCallback(pp_callback, &options);
   viewer.registerKeyboardCallback(kb_callback, &options);
@@ -356,9 +310,9 @@ int main (int argc, char** argv)
   viewer.initCameraParameters ();
 
   int msg_nr = 1;
-  if (sfm.visible.size() == 0)
+  if (sfm->visible.size() == 0)
     viewer.addText("No visibility info", 10, 10 + (10 * msg_nr++), 0.8,0,1);
-  if (sfm.poses.size() == 0)
+  if (sfm->poses.size() == 0)
     viewer.addText("No camera poses", 10, 10 + (10 * msg_nr++), 1,1,0);
 
 

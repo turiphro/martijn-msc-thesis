@@ -25,11 +25,16 @@ SfMReader::SfMReader(string path, string imagespath)
   this->path = path;
   this->imagespath = imagespath;
   window_size = Size(0,0);
+  if (imagespath != "")
+    sc = new SequenceCapture(imagespath);
+  else
+    sc = NULL;
   read();
 }
 
 SfMReader::~SfMReader()
 {
+  delete sc;
 }
 
 
@@ -86,6 +91,7 @@ bool SfMReader::readNVM()
     return false;
 
   int camera_count, point_count;
+  size_t found;
 
   int state = 0; // for states see comment above
   string line;
@@ -113,6 +119,10 @@ bool SfMReader::readNVM()
         double fovy;        // fovy: FoV in y direction
         double focal, q1,q2,q3,q4, radial;
         sline >> filename >> focal >> q1>>q2>>q3>>q4 >> cx >> cy >> cz >> radial;
+        found = filename.find_last_of("/\\");
+        if (found != string::npos)
+          filename = filename.substr(found+1);
+        
         q.at<double>(0) = q1; q.at<double>(1) = q2;
         q.at<double>(2) = q3; q.at<double>(3) = q4;
 
@@ -120,9 +130,9 @@ bool SfMReader::readNVM()
         cameras.push_back(camera());
         cameras.back().t = Mat(3, 1, CV_64FC1);
         // apparently, t = -1 * t in nvm; we need to correct this:
-        cameras.back().t.at<double>(0) = -1 * cx;
-        cameras.back().t.at<double>(1) = -1 * cy;
-        cameras.back().t.at<double>(2) = -1 * cz;
+        cameras.back().t.at<double>(0) = cx;
+        cameras.back().t.at<double>(1) = cy;
+        cameras.back().t.at<double>(2) = cz;
         cameras.back().R = Mat(3, 3, CV_64FC1);
         quaternion2matrix(q, cameras.back().R);
         cameras.back().focal = focal;
@@ -479,12 +489,27 @@ void SfMReader::getWindowSize(Size& size)
       return;
     }
     Mat frame;
-    SequenceCapture sq(imagespath);
-    sq.read(frame);
+    sc->setPosition(0);
+    sc->read(frame);
     this->window_size = frame.size();
   }
   // set window size
   size = this->window_size;
+}
+
+int SfMReader::getImageID(string filename)
+{
+  // remove directory names
+  size_t found = filename.find_last_of("/\\");
+  if (found != string::npos)
+    filename = filename.substr(found+1);
+
+  // search filename
+  for (int i=0; i<image_filenames.size(); i++)
+    if (image_filenames[i] == filename)
+      return i;
+
+  return -1;
 }
 
 bool SfMReader::integerLine(string line, int count)
@@ -525,7 +550,9 @@ bool SfMReader::integerLine(string line, int count)
 bool SfMReader::selectPointsForCamera(int id,
                                       Scalar colourCamera,
                                       Scalar colourSelectedCamera,
-                                      Scalar colourSelectedPoint)
+                                      Scalar colourVisiblePoint,
+                                      Scalar colourInvisiblePoint,
+                                      bool calcInvisible)
 {
   if (poses.size() < id)
     return false;
@@ -534,15 +561,26 @@ bool SfMReader::selectPointsForCamera(int id,
   resetPointColours();
   line_ends.clear();
   curr_visible_keypoints.clear();
-  points_curr_visibility.clear();
-  for (int i=0; i<visible.size(); i++) {
-    points_curr_visibility.push_back( visible.at(i).find(id) != visible.at(i).end() );
-    if (points_curr_visibility.back()) {
-      points.at(i).r = colourSelectedPoint[2];
-      points.at(i).g = colourSelectedPoint[1];
-      points.at(i).b = colourSelectedPoint[0];
-      line_ends.push_back(&points.at(i));
-      curr_visible_keypoints.push_back(&visible.at(i).find(id)->second);
+  points_curr_visible.clear();
+  points_curr_invisible.clear();
+  Size window_size;
+  getWindowSize(window_size);
+  for (int p=0; p<visible.size(); p++) {
+    points_curr_visible.push_back( visible.at(p).find(id) != visible.at(p).end() );
+    if (points_curr_visible.back()) {
+      points.at(p).r = colourVisiblePoint[2];
+      points.at(p).g = colourVisiblePoint[1];
+      points.at(p).b = colourVisiblePoint[0];
+      line_ends.push_back(&points.at(p));
+      curr_visible_keypoints.push_back(&visible.at(p).find(id)->second);
+    }
+    if (calcInvisible) {
+      points_curr_invisible.push_back( !points_curr_visible[p] && reprojectsInsideImage(p, id, window_size));
+      if (points_curr_invisible.back()) {
+        points.at(p).r = colourInvisiblePoint[2];
+        points.at(p).g = colourInvisiblePoint[1];
+        points.at(p).b = colourInvisiblePoint[0];
+      }
     }
   }
 
@@ -590,7 +628,8 @@ bool SfMReader::selectCamerasForPoint(int id,
   // recolour and save poses for given point
   line_ends.clear();
   curr_visible_keypoints.clear();
-  points_curr_visibility.clear();
+  points_curr_visible.clear();
+  points_curr_invisible.clear();
   map<int,visibility>* vismap = &visible.at(id);
   map<int,visibility>::iterator it;
   int frame;
@@ -651,7 +690,7 @@ void SfMReader::reproject(PointXYZRGB* point, camera* cam, PointXYZRGB* projecte
   x.at<double>(0) = point->x;
   x.at<double>(1) = point->y;
   x.at<double>(2) = point->z;
-  v = K * cam->R * (x + cam->t);
+  v = K * cam->R * (x - cam->t);
   projected->x = v.at<double>(0)/v.at<double>(2);
   projected->y = v.at<double>(1)/v.at<double>(2);
   projected->z = 0;
@@ -660,7 +699,7 @@ void SfMReader::reproject(PointXYZRGB* point, camera* cam, PointXYZRGB* projecte
   projected->b = point->b;
 }
 
-bool SfMReader::reprojectsInsideImage(int pointID, int camID, Size size)
+bool SfMReader::reprojectsInsideImage(int pointID, int camID, Size size, PointXYZRGB* projected)
 {
   if (pointID<0 || pointID>=points.size()
     || camID<0 || camID>=cameras.size()) {
@@ -668,22 +707,74 @@ bool SfMReader::reprojectsInsideImage(int pointID, int camID, Size size)
     return false;
   }
 
-  // TODO: would be nicer to find size ourselves
-
   return reprojectsInsideImage(&points.at(pointID),
                                &cameras.at(camID),
-                               size);
+                               size,
+                               projected);
 }
 
-bool SfMReader::reprojectsInsideImage(PointXYZRGB* point, camera* cam, Size size)
+bool SfMReader::reprojectsInsideImage(PointXYZRGB* point, camera* cam, Size size, PointXYZRGB* projected)
 {
-  PointXYZRGB projected;
-  reproject(point, cam, &projected);
-  return (projected.x >= size.width/-2.0
-       && projected.x <= size.width/2.0
-       && projected.y >= size.height/-2.0
-       && projected.y <= size.height/2.0);
+  PointXYZRGB projected2;
+  if (!projected)
+    projected = &projected2; // don't care about results, but have to save somewhere
+
+  PointXYZRGB proj;
+  reproject(point, cam, &proj);
+  bool ret = (proj.x >= size.width/-2.0
+           && proj.x <= size.width/2.0
+           && proj.y >= size.height/-2.0
+           && proj.y <= size.height/2.0);
+  if (ret) {
+    projected->x = proj.x;
+    projected->y = proj.y;
+    projected->z = proj.z;
+  }
+  return ret;
 }
+
+/* Distort point x, y using one distortion parameter.
+ * Code for this function is shamelessly copy-pasted from:
+ * https://groups.google.com/forum/#!msg/vsfm/IcbdIVv_Uek/Us32SB
+ */
+void SfMReader::distortPointR1(PointXYZRGB* point, camera* cam) { 
+  const double k1 = cam->radial[0];
+
+  if (k1 == 0)
+    return;
+     
+  const double x = point->x / cam->focal;
+  const double y = point->y / cam->focal;
+
+  const double t2 = y*y; 
+  const double t3 = t2*t2*t2; 
+  const double t4 = x*x; 
+  const double t7 = k1*(t2+t4); 
+  if (k1 > 0) { 
+    const double t8 = 1.0/t7; 
+    const double t10 = t3/(t7*t7); 
+    const double t14 = sqrt(t10*(0.25+t8/27.0)); 
+    const double t15 = t2*t8*y*0.5; 
+    const double t17 = pow(t14+t15,1.0/3.0); 
+    const double t18 = t17-t2*t8/(t17*3.0); 
+    point->x = cam->focal * (t18*x/y);
+    point->y = cam->focal * t18; 
+  } else { 
+    const double t9 = t3/(t7*t7*4.0); 
+    const double t11 = t3/(t7*t7*t7*27.0); 
+    const std::complex<double> t12 = t9+t11; 
+    const std::complex<double> t13 = sqrt(t12); 
+    const double t14 = t2/t7; 
+    const double t15 = t14*y*0.5; 
+    const std::complex<double> t16 = t13+t15; 
+    const std::complex<double> t17 = pow(t16,1.0/3.0); 
+    const std::complex<double> t18 = (t17+t14/ 
+(t17*3.0))*std::complex<double>(0.0,sqrt(3.0)); 
+    const std::complex<double> t19 = -0.5*(t17+t18)+t14/(t17*6.0); 
+    point->x = cam->focal * (t19.real()*x/y);
+    point->y = cam->focal * t19.real();
+  } 
+} 
 
 
 void SfMReader::quaternion2matrix(Mat& q, Mat& R)

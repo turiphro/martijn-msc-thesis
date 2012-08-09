@@ -23,16 +23,22 @@ int main (int argc, char** argv)
   if (argc<4)
     usage(argv[0]);
 
+  // settings
   int carve = 1;
   int resolution = 500;
-  int param1 = 0.5;
+  double param1 = 0.1;
+  bool extent = false;
+  bool graphcut = false;
 
+  // carve
   OccupancyGrid occgrid(argv[1], argv[2], resolution);
-  //occgrid.carve(false, true, 0, 0.5); // discretised point cloud only
-  //occgrid.carve(true, true, 0, 0.5); // carve 0 
-  //occgrid.carve(true, false, 1, 0.05); // carve 1
+  if (extent)
+    occgrid.extentVisibilityLists(0.2);
   occgrid.carve(true, true, carve, param1);
+  if (graphcut)
+    occgrid.graphcut(0.5);
 
+  // save
   // TODO: use extension (.bt, .ot) to determine boolean
   occgrid.save(argv[3], false);
   cout << "Result saved as " << argv[3] << endl;

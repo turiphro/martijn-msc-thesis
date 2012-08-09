@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 #include <dirent.h>
+#include <boost/algorithm/string.hpp>    
+
 
 using namespace std;
 using namespace cv;
@@ -19,12 +21,12 @@ class SequenceCapture
 
   private:
     VideoCapture* videoCapture;
-    string path;
-    vector<string> images; // for directory with images only
     int position;
     enum {CAMERA, VIDEO, IMAGES} type;
     
   public:
+    string path;
+    vector<string> images; // for directory with images only
 
     SequenceCapture(int device);
     SequenceCapture(string path);

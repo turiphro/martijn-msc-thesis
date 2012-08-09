@@ -138,7 +138,6 @@ int main (int argc, char** argv)
       cout << " PGDN:     -25 frames" << endl;
       cout << " f/b/HOME: first frame" << endl;
       cout << " l/e/END:  last frame" << endl;
-      cout << " l/e/END:  last frame" << endl;
       cout << " --- visuals ---" << endl;
       cout << " 1:        rich keypoint draw on/off" << endl;
       cout << " 2:        match arrows draw on/off" << endl;
@@ -214,6 +213,8 @@ int main (int argc, char** argv)
         string record_filename = "output " + ctim.substr(0,ctim.size()-1) + ".avi";
         recorder = new VideoWriter(record_filename, CV_FOURCC('D','I','V','X'),
                                    10, output.size(), true);
+        if (paused)
+          last_i = -2; // save next frame if paused
       }
     }
 
