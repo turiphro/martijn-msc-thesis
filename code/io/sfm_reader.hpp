@@ -14,7 +14,7 @@
 #include <opencv2/core/core.hpp>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
-//#include <pcl/io/ply_io.h>
+#include <pcl/io/ply_io.h>
 #include <pcl/visualization/common/common.h>
 
 #include "sequence_capture.hpp"
@@ -83,11 +83,11 @@ class SfMReader
     void getWindowSize(Size& size);
     int getImageID(string filename);
     bool selectPointsForCamera(int id,
+                               bool calcInvisible=true,
                                Scalar colourCamera = Scalar(0,255,255),
                                Scalar colourSelectedCamera = Scalar(0,0,255),
                                Scalar colourVisiblePoint = Scalar(0,255,0),
-                               Scalar colourInvisiblePoint = Scalar(0,0,255),
-                               bool calcInvisible=true);
+                               Scalar colourInvisiblePoint = Scalar(0,0,255));
     bool selectCamerasForPoint(int id,
                                Scalar colourCamera = Scalar(0,255,255),
                                Scalar colourSelectedCamera = Scalar(0,0,255),

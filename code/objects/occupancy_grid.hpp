@@ -27,6 +27,7 @@
 #include "../io/sfm_reader.hpp"
 #include "../io/sequence_capture.hpp"
 #include "../objects/listhelpers.cpp"
+#include "../maxflow/graph.h"
 
 using namespace std;
 using namespace pcl;
@@ -44,6 +45,7 @@ typedef struct projected_voxel
 
 bool projected_voxel_comp(projected_voxel a, projected_voxel b);
 
+
 class OccupancyGrid
 {
   public:
@@ -51,19 +53,23 @@ class OccupancyGrid
     SfMReader* sfm;
 
     OccupancyGrid(string path, string imagespath="", int resolution=250);
+    OccupancyGrid();
     ~OccupancyGrid();
     bool load(string path);
-    bool carve(bool exportUnknowns=false,
-               bool exportOccupied=true,
-               int method=0,
+    bool carve(int method=0,
                double param1=0.1);
+    bool carveBaseline();
     bool carveSingleRay(double ignoredBorderSize=0.1,
                         bool exportUnknowns=false,
                         bool exportOccupied=true);
     bool carveSingleRayInvisible(double occluderProbAddition=0.1,
                                  bool exportOccupied=true);
+    bool carveSingleRayImproved(double occluderProbAddition=0.1,
+                                double visibleProbAddition=0.1,
+                                double threshold=0.2,
+                                bool exportOccupied=true);
     bool save(string filename, bool binary=false);
-    void graphcut(double gamma=0.5);
+    void graphcut(double gamma=1.0, double unknownProb=0.4);
     void extentVisibilityLists(double threshold=0.2);
     double reprojectMatch(Mat* img1, Mat* img2, 
                           camera* cam1, camera* cam2,
@@ -82,13 +88,17 @@ class OccupancyGrid
 
     void visualise(Mat& output, camera* cam,
                    bool redraw=true,
-                   string method="circle", double alpha=0.5);
+                   string method="circle", double alpha=0.5,
+                   double max_dist=25);
     bool visualisePose(Mat& output, int poseID,
-                       string method="circle", double alpha=0.5);
+                       string method="circle", double alpha=0.5,
+                       double max_dist=25);
     void visualisePath(vector<Mat>* output,
-                       string method="circle", double alpha=0.5);
+                       string method="circle", double alpha=0.5,
+                       double max_dist=25);
     void visualisePath(vector<Mat>* output, vector<camera>* path,
-                       string method="circle", double alpha=0.5);
+                       string method="circle", double alpha=0.5,
+                       double max_dist=25);
 
 };
 

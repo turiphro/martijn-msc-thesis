@@ -29,7 +29,7 @@ int main (int argc, char** argv)
   OccupancyGrid occgrid(argv[1], argv[2], 1);
   occgrid.load(argv[3]);
 
-  /*
+  /* This is requiring too much memory for larger datasets:
   // calculate annotated images
   vector<Mat> output;
   cout << "Annotating images.." << endl;
@@ -48,10 +48,9 @@ int main (int argc, char** argv)
   while (1) {
     if (occgrid.visualisePose(output, i, "circle", 0.2)) {
 
-      // TODO: buffer
+      // TODO: buffer?
 
       imshow("visualise", output);
-      //imshow("visualise", output.at(i));
       
       // if recording, save frame
       if (last_i != i && recorder)

@@ -149,15 +149,54 @@
 
 2012/08/06
 ==========
-- worked on OccupancyGrid::visualise (plot voxels in image)
+- Worked on OccupancyGrid::visualise (plot voxels in image)
 
 2012/08/07
 ==========
-- worked on OccupancyGrid::visualise functions
-- compiled LearnedOcclusions for lampposts dataset (took 3 days)
+- Worked on OccupancyGrid::visualise functions
+- Compiled LearnedOcclusions data for lampposts dataset (took 3 days)
 
 2012/08/08
 ==========
 - Finished octogrid visualisation functions
 - Made carveviewer interface
+
+2012/08/09
+==========
+- (PGM meeting)
+- Created depth maps
+
+2012/08/13
+==========
+- Read paper min-cut/max-flow algorithm
+
+2012/08/14
+==========
+- Read paper Line SfM
+- Got binary PLY files working (using PCL)
+
+2012/08/15
+==========
+- Made convenient (python) script to run sfmcarver multiple times
+  on multiple datasets with different settings
+- Made 3 new datasets
+- Processed some datasets (vsfm + sfmcarver)
+
+2012/08/16
+==========
+- (PGM meeting + meeting Gabriel)
+
+2012/08/17
+==========
+- Read paper Buiding Rome on a Cloudless Day
+- Made carve 3 (using extentVisibilityLists and prob for vis and invis)
+
+2012/08/18
+==========
+- Worked on octree graphcut
+
+2012/08/19
+==========
+- Finished octree graphcut (octreegraphcut)
+
 

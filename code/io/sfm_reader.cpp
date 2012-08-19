@@ -330,9 +330,6 @@ bool SfMReader::readPLY()
    *                                       and NO camera poses
    */
 
-  // pcl::PLYReader?
-  // http://docs.pointclouds.org/trunk/classpcl_1_1_p_l_y_reader.html
-
   ifstream file(path.c_str());
   if (!file.is_open())
     return false;
@@ -345,6 +342,17 @@ bool SfMReader::readPLY()
     string filename;
     switch (state) {
       case 0: // header
+        if (line.find("format binary") == 0) {
+          // binary file; use PCL reader and exit
+          // (however, ascii files don't seem to work,
+          //  so we parse them manually)
+          cout << "Binary PLY file" << endl;
+          file.close();
+          PLYReader plyreader;
+          plyreader.read(path, points);
+          state = 2;
+          break;
+        }
         if (line.find("end_header") == 0) {
           state = 1;
         }
@@ -369,7 +377,8 @@ bool SfMReader::readPLY()
         break;
     }
   }
-  file.close();
+  if (file.is_open())
+    file.close();
 
   cout << points.size() << " points read!" << endl;
 
@@ -548,11 +557,11 @@ bool SfMReader::integerLine(string line, int count)
 
 
 bool SfMReader::selectPointsForCamera(int id,
+                                      bool calcInvisible,
                                       Scalar colourCamera,
                                       Scalar colourSelectedCamera,
                                       Scalar colourVisiblePoint,
-                                      Scalar colourInvisiblePoint,
-                                      bool calcInvisible)
+                                      Scalar colourInvisiblePoint)
 {
   if (poses.size() < id)
     return false;

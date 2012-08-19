@@ -1,5 +1,5 @@
 =====================
-Software requirements
+    INSTALLATION
 =====================
 
 1. Install OpenCV (I used 2.4.1)
@@ -53,6 +53,9 @@ Software requirements
           Otherwise, download Lowe's sift binary (extract binary only to vsfm/bin/):
           http://www.cs.ubc.ca/~lowe/keypoints/
 
+        Optionally, one could additionally install CMVS/PMVS for dense reconstruction
+        (for comparison only; the dense output is not used for carving).
+
    b. Voodoo (I used 1.2.0 beta)
 
         Download binary from:
@@ -85,4 +88,12 @@ Software requirements
 
    Tested on Ubuntu 12.04. Should work on other operating systems as well.
    On Windows, you might want to install Cygwin for easy compiling and running.
+
+
+
+=====================
+       USAGE
+=====================
+
+todo
 
