@@ -198,5 +198,27 @@
 2012/08/19
 ==========
 - Finished octree graphcut (octreegraphcut)
+- Made some voodoo outputs (harris)
 
+2012/08/20
+==========
+- Read paper What can Missing Correspondences Tell Us
+- Made (and got) some more datasets
+
+2012/08/21
+==========
+- Wrote introduction
+- Processed some data
+- Read paper High-level scene structure using visibility and occlusion
+
+2012/08/23
+==========
+- (PGM meeting)
+- Processed some data
+
+2012/08/24-28
+=============
+- Wrote Background section
+- Read paper Camparison and Evaluation of MVS algs
+- Read paper Manhattan-world Stereo
 

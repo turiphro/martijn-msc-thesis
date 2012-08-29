@@ -411,12 +411,12 @@ bool SfMReader::readTXT()
     string filename;
     switch (state) {
       case 0: // header
-        if (line == "#timeindex 1") {
+        if (line.find("#timeindex") == 0) {
           state = 1;
         }
         break;
       case 1: // cameras
-        if (line == "#") {
+        if (line.find("# 3D") == 0) {
           state = 2;
           break;
         } else if (line.at(0) == '#') {
@@ -688,7 +688,7 @@ void SfMReader::getExtrema(Scalar& min, Scalar& max)
  * note: this will return the undistorted location
  * (re-distort before displaying in an image)
  */
-void SfMReader::reproject(PointXYZRGB* point, camera* cam, PointXYZRGB* projected)
+void SfMReader::reproject(PointXYZRGB* point, camera* cam, PointXYZRGB* projected, bool* front)
 {
   Mat K = Mat::zeros(3, 3, CV_64FC1);
   K.at<double>(0,0) = cam->focal;
@@ -706,6 +706,11 @@ void SfMReader::reproject(PointXYZRGB* point, camera* cam, PointXYZRGB* projecte
   projected->r = point->r;
   projected->g = point->g;
   projected->b = point->b;
+  if (front != NULL)
+    if (v.at<double>(2) < 0)
+      *front = false;
+    else
+      *front = true;
 }
 
 bool SfMReader::reprojectsInsideImage(int pointID, int camID, Size size, PointXYZRGB* projected)
@@ -729,11 +734,13 @@ bool SfMReader::reprojectsInsideImage(PointXYZRGB* point, camera* cam, Size size
     projected = &projected2; // don't care about results, but have to save somewhere
 
   PointXYZRGB proj;
-  reproject(point, cam, &proj);
+  bool front;
+  reproject(point, cam, &proj, &front);
   bool ret = (proj.x >= size.width/-2.0
            && proj.x <= size.width/2.0
            && proj.y >= size.height/-2.0
-           && proj.y <= size.height/2.0);
+           && proj.y <= size.height/2.0
+           && front);
   if (ret) {
     projected->x = proj.x;
     projected->y = proj.y;

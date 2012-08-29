@@ -2,13 +2,16 @@
 ## run sfmcarver multiple times with different settings
 
 # set variables
-#datasets    = ['car_and_wall2', 'phonebox1', 'lampposts_on_wall1', 'sainsburys1', 'sainsburys2', 'houses1', 'sciencepark2']
+#datasets    = ['memorial', 'sculpture1', 'car_and_wall1', 'car_and_wall2', 'phonebox1', 'lampposts_on_wall1', 'sainsburys1', 'sainsburys2', 'houses1', 'sciencepark2']
 #methods     = [0, 1, 2, 3]
 #params1     = [ [0], [0, 0.5], [0.005, 0.01, 0.05, 0.1], [0.001, 0.005, 0.01] ] # list of lists (one foreach method)
-datasets    = ['sciencepark2'] #['car_and_wall2', 'phonebox1', 'lampposts_on_wall1', 'sainsburys1', 'sainsburys2', 'houses1', 'sciencepark2']
-methods     = [0, 1, 2]
-params1     = [ [0], [0, 0.5], [0.005, 0.01, 0.05, 0.1] ] # list of lists (one foreach method)
-resolutions = [1000]
+
+# TO RUN BECAUSE: 1000 RESOLUTION, 0.001 PARAMETER
+
+datasets    = ['memorial']
+methods     = [2]
+params1     = [ [0.001, 0.005, 0.01, 0.05, 0.1] ] # list of lists (one foreach method)
+resolutions = [250, 500, 1000]
 ext         = '.ot'  # .ot or .bt for binary
 skip_done   = True
 

@@ -95,7 +95,7 @@ class SfMReader
 
     void resetPointColours();
     void getExtrema(Scalar& min, Scalar& max);
-    void reproject(PointXYZRGB* point, camera* cam, PointXYZRGB* projected);
+    void reproject(PointXYZRGB* point, camera* cam, PointXYZRGB* projected, bool* front=NULL);
     bool reprojectsInsideImage(int pointID, int camID, Size size, PointXYZRGB* projected=NULL);
     bool reprojectsInsideImage(PointXYZRGB* point, camera* cam, Size size, PointXYZRGB* projected=NULL);
     void distortPointR1(PointXYZRGB* point, camera* cam);

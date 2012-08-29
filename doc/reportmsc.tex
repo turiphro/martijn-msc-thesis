@@ -22,12 +22,16 @@
 %\usepackage{epsf}
 \usepackage{fancyvrb}
 % Uncomment this package to enable internal-linking:
-%\usepackage{hyperref}
+\usepackage[pdfborder={0 0 0}]{hyperref}
 
 
 %%%%%%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%% 
 % hints: http://www.cs.uwaterloo.ca/~brecht/thesis-hints.html
-% - clean up example report code
+% - motivational image(s) in introduction
+% - process all TODO's in all .tex files
+% - proof-read and spell-check
+% - make movies of results and mention in section 'results'
+
 
 
 %%%%%%%%%%%%%%%%% COMMANDS %%%%%%%%%%%%%%%%% 
@@ -40,6 +44,9 @@
 \def\eg{{\it e.g.,\ }}
 \def\vs{{\it vs.\ }}
 
+\input{fullcitations.tex}
+
+
 
 %\renewcommand{\baselinestretch}{1.5}
 %\renewcommand{\bibname}{References}
@@ -48,8 +55,10 @@
 %%%%%%%%%%%%%%%%% TITLE PAGE %%%%%%%%%%%%%%%%% 
 
 % worktitle
-\title{Constructing the concave hull of an outdoor scene
-       using visibility traces of points and edges}
+%\title{Constructing the concave hull of an outdoor scene
+%       using visibility traces of points and edges}
+\title{Finding low-texture and reflective occluders in outdoor scenes
+       using visibility and occlusion}
 
 \author{Martijn Frederik Wouter van der Veen}
 \def \supervisor {Gabriel J. Brostow}
@@ -77,7 +86,7 @@
 %\section*{Acknowledgements}
 % TODO
 
-%\setcounter{tocdepth}{2}
+\setcounter{tocdepth}{1}
 \tableofcontents
 \listoffigures
 %\listoftables
@@ -105,7 +114,7 @@
 
 
 %%%%%%%%%%%%%%%%% CONTENT: BACKGROUND %%%%%%%%%%%%%%%%% 
-\chapter{Background}
+\chapter{Background and Related Work}
 \label{background}
 \input{background.tex}
 
@@ -117,7 +126,7 @@
 \input{method.tex}
 
 
-\chapter{Implementation}
+\chapter{Implementation} % subsection of Method if < 5 pages
 \label{chp:impl}
 %\input{implementation.tex}
 
@@ -129,12 +138,9 @@
 \label{chp:eval}
 %\input{evaluation.tex}
 
-\section{Figures} \label{sectionExample}
+% includes short discussion
 
-
-\chapter{Discussion and Future Work}
-\label{chp:eval}
-%\input{discussion.tex}
+%\section{Figures} \label{sectionExample}
 
 
 
@@ -144,6 +150,9 @@
 \chapter{Conclusion}
 \label{chp:conc}
 %\input{conclusion.tex}
+
+% includes future work
+
 
 
 %%% latex hints:
@@ -169,6 +178,13 @@
 
 
 
+%%%%%%%%%%%%%%%%% REFERENCES %%%%%%%%%%%%%%%%% 
+
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\bibliography{mscthesis}
+
+
 
 %%%%%%%%%%%%%%%%% APPENDICES %%%%%%%%%%%%%%%%% 
 
@@ -176,19 +192,12 @@
 
 \cleardoublepage
 \appendix
-\chapter{Theoretical Background}
+\chapter{}
 \label{chp:theory}
 %\input{theory.tex}
 
 
 
-
-
-%%%%%%%%%%%%%%%%% REFERENCES %%%%%%%%%%%%%%%%% 
-
-\addcontentsline{toc}{chapter}{Bibliography}
-
-\bibliography{mscthesis}
 
 
 \end{document}

@@ -11,7 +11,7 @@ void usage(char* name)
   cout << " " << name << " <octree in> <octree out> [<gamma> [<unknown>]]" << endl;
   cout << " octree in/out: filename of octree file (.ot, or .bt for binary)" << endl;
   cout << " gamma:         weight of voxel prob difference for pairwise cost; default: 1" << endl;
-  cout << " unknown:       occupancy probability of unknown (un-initialised) voxels; default: 0.4" << endl;
+  cout << " unknown:       occupancy probability of unknown (un-initialised) voxels; default: 0.2" << endl;
   exit(1);
 }
 
@@ -24,7 +24,7 @@ int main (int argc, char** argv)
     usage(argv[0]);
 
   // settings
-  double gamma =   1.0; // penalty for discontinuity in space
+  double gamma =   0.6; // penalty for discontinuity in space
                         // (weight for probability difference pairwise cost)
                         // > 1 does not seem to make a difference
   double unknown = 0.2; // prior; below 0.5 makes sense

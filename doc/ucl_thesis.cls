@@ -241,8 +241,12 @@
      \end{center}
     \vspace{2em}
      \begin{center}
-     The report will be distributed to the internal and external examiners, but \\
-thereafter may not be copied or distributed except with permission from the author.
+      % The report will be distributed to the internal and external examiners, but \\
+      % thereafter may not be copied or distributed except with permission from the author.
+
+      %% Don't be so protective. We're talking about science!
+
+      The report may be freely copied and distributed provided the source is explicitly acknowledged.
     \end{center}%
     \vspace{2em}%
     \begin{center}%

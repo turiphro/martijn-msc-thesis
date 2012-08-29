@@ -405,50 +405,37 @@ void OccupancyGrid::graphcut(double gamma, double unknownProb)
        end = tree->end_leafs(); it != end; it++) {
     key = it.getKey();
     prob = exp( it->getValue() );
-    prob = std::max( std::min(prob, 1.0), 0.0 ); // clamp
+    prob = std::max( std::min(prob, 1.0), 0.0 ); // truncate
+    //prob = (prob > 0.7);
+    //prob = tree->isNodeOccupied(*it);
     id = (key.k[2] - min.k[2]) * maxI * maxJ
        + (key.k[1] - min.k[1]) * maxI
        + (key.k[0] - min.k[0]);
-    graph->add_tweights(id, prob, 1 - prob);
+    graph->add_tweights(id, prob, (1 - prob));
     unary[id] = prob;
   }
        
   // add edges + pairwise costs
   int id2, val;
-  for (int k=0; k<maxK; k++) {
-    for (int j=0; j<maxJ; j++) {
-      for (int i=0; i<maxI; i++) {
+  for (int k=0; k<maxK-1; k++) {
+    for (int j=0; j<maxJ-1; j++) {
+      for (int i=0; i<maxI-1; i++) {
         id = k * maxI * maxJ + j * maxI + i;
-        if (j > 0) { // connect to top
-          id2 = k * maxI * maxJ + (j-1) * maxI + i;
-          val = gamma * (1 - (unary[id] - unary[id2]) );
-          graph->add_edge(id, id2, val, val);
-        }
-        if (i < maxI-1) { // connect to right
-          id2 = k * maxI * maxJ + j * maxI + (i+1);
-          val = gamma * (1 - (unary[id] - unary[id2]) );
-          graph->add_edge(id, id2, val, val);
-        }
-        if (j < maxJ-1) { // connect to bottom
-          id2 = k * maxI * maxJ + (j+1) * maxI + i;
-          val = gamma * (1 - (unary[id] - unary[id2]) );
-          graph->add_edge(id, id2, val, val);
-        }
-        if (i > 0) { // connect to left
-          id2 = k * maxI * maxJ + j * maxI + (i-1);
-          val = gamma * (1 - (unary[id] - unary[id2]) );
-          graph->add_edge(id, id2, val, val);
-        }
-        if (k < maxK-1) { // connect to back
-          id2 = (k+1) * maxI * maxJ + j * maxI + i;
-          val = gamma * (1 - (unary[id] - unary[id2]) );
-          graph->add_edge(id, id2, val, val);
-        }
-        if (k > 0) { // connect to front
-          id2 = (k-1) * maxI * maxJ + j * maxI + i;
-          val = gamma * (1 - (unary[id] - unary[id2]) );
-          graph->add_edge(id, id2, val, val);
-        }
+        // connect to right
+        id2 = k * maxI * maxJ + j * maxI + (i+1);
+        val = gamma * (1 - (unary[id] - unary[id2]) );
+        //val = gamma * ( (unary[id]>0.7) != (unary[id2]>0.7) );
+        graph->add_edge(id, id2, val, val);
+        // connect to bottom
+        id2 = k * maxI * maxJ + (j+1) * maxI + i;
+        val = gamma * (1 - (unary[id] - unary[id2]) );
+        //val = gamma * ( (unary[id]>0.7) != (unary[id2]>0.7) );
+        graph->add_edge(id, id2, val, val);
+        // connect to back
+        id2 = (k+1) * maxI * maxJ + j * maxI + i;
+        val = gamma * (1 - (unary[id] - unary[id2]) );
+        //val = gamma * ( (unary[id]>0.7) != (unary[id2]>0.7) );
+        graph->add_edge(id, id2, val, val);
       }
     }
   }
@@ -460,6 +447,7 @@ void OccupancyGrid::graphcut(double gamma, double unknownProb)
 
   // convert back
   cout << " c. converting back to octree" << endl;
+  tree->clear();
   bool occupied;
   for (int k=0; k<maxK; k++) {
     for (int j=0; j<maxJ; j++) {
