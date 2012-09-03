@@ -62,11 +62,11 @@ bool OccupancyGrid::load(string path)
 bool OccupancyGrid::carve(int method,
                           double param1)
 {
-  if (sfm->poses.size() == 0) {
+  if (sfm->poses.size() == 0 && method > 0) {
     cerr << "[!!] No camera poses known!" << endl;
     return false;
   }
-  if (sfm->visible.size() < sfm->poses.size()) {
+  if (sfm->visible.size() < sfm->poses.size() && method > 0) {
     cerr << "[!!] No or not enough visibility information!" << endl;
     return false;
   }
@@ -76,11 +76,11 @@ bool OccupancyGrid::carve(int method,
     case 0:
       return carveBaseline();
     case 1:
-      return carveSingleRay(param1, true, true);
+      return carveVisSingleRay(param1, true, true);
     case 2:
-      return carveSingleRayInvisible(param1, true);
+      return carveVisOccSingleRayVeto(param1, true);
     case 3:
-      return carveSingleRayImproved(param1, param1, 0.2, true);
+      return carveVisOccSingleRayGeneral(param1, param1, 0.2, true);
     default:
       cerr << "[!!] Error: unknown carving method (" << method << ")" << endl;
       return false;
@@ -114,7 +114,8 @@ bool OccupancyGrid::carveBaseline()
 }
 
 
-/* Carve using rays from camera poses to points
+/* Visibility Space Carving (using single rays):
+ * Carve using rays from camera poses to points
  * (ray sets every hitting voxel to free and point
  * voxel to occupied; the others are unknown and
  * therefore probably occluders.
@@ -125,9 +126,9 @@ bool OccupancyGrid::carveBaseline()
  * to occupied threshold. To ignore points projected
  * near camera view borders, set ignoredBorderSize != 0.0.
  */
-bool OccupancyGrid::carveSingleRay(double ignoredBorderSize,
-                                   bool exportUnknowns,
-                                   bool exportOccupied)
+bool OccupancyGrid::carveVisSingleRay(double ignoredBorderSize,
+                                             bool exportUnknowns,
+                                             bool exportOccupied)
 {
   point3d origin, end;
   map<int,visibility>* vismap;
@@ -194,8 +195,8 @@ bool OccupancyGrid::carveSingleRay(double ignoredBorderSize,
   return true;
 }
 
-bool OccupancyGrid::carveSingleRayInvisible(double occluderProbAddition,
-                                            bool exportOccupied)
+bool OccupancyGrid::carveVisOccSingleRayVeto(double occluderProbAddition,
+                                             bool exportOccupied)
 {
   point3d origin, end;
   map<int,visibility>* vismap;
@@ -269,7 +270,7 @@ bool OccupancyGrid::carveSingleRayInvisible(double occluderProbAddition,
   return true;
 }
 
-bool OccupancyGrid::carveSingleRayImproved(double occluderProbAddition, double visibleProbAddition, double threshold, bool exportOccupied)
+bool OccupancyGrid::carveVisOccSingleRayGeneral(double occluderProbAddition, double visibleProbAddition, double threshold, bool exportOccupied)
 {
   point3d origin, end;
   map<int,visibility>* vismap;
@@ -404,7 +405,7 @@ void OccupancyGrid::graphcut(double gamma, double unknownProb)
   for (OcTree::leaf_iterator it = tree->begin_leafs(),
        end = tree->end_leafs(); it != end; it++) {
     key = it.getKey();
-    prob = exp( it->getValue() );
+    prob = exp( it->getValue() ) - 0.2;
     prob = std::max( std::min(prob, 1.0), 0.0 ); // truncate
     //prob = (prob > 0.7);
     //prob = tree->isNodeOccupied(*it);
@@ -423,18 +424,18 @@ void OccupancyGrid::graphcut(double gamma, double unknownProb)
         id = k * maxI * maxJ + j * maxI + i;
         // connect to right
         id2 = k * maxI * maxJ + j * maxI + (i+1);
-        val = gamma * (1 - (unary[id] - unary[id2]) );
-        //val = gamma * ( (unary[id]>0.7) != (unary[id2]>0.7) );
+        val = gamma * (1 - abs(unary[id] - unary[id2]) );
+        //val = gamma * int( (unary[id]<0.7) != (unary[id2]<0.7) );
         graph->add_edge(id, id2, val, val);
         // connect to bottom
         id2 = k * maxI * maxJ + (j+1) * maxI + i;
-        val = gamma * (1 - (unary[id] - unary[id2]) );
-        //val = gamma * ( (unary[id]>0.7) != (unary[id2]>0.7) );
+        val = gamma * (1 - abs(unary[id] - unary[id2]) );
+        //val = gamma * int( (unary[id]<0.7) != (unary[id2]<0.7) );
         graph->add_edge(id, id2, val, val);
         // connect to back
         id2 = (k+1) * maxI * maxJ + j * maxI + i;
-        val = gamma * (1 - (unary[id] - unary[id2]) );
-        //val = gamma * ( (unary[id]>0.7) != (unary[id2]>0.7) );
+        val = gamma * (1 - abs(unary[id] - unary[id2]) );
+        //val = gamma * int( (unary[id]<0.7) != (unary[id2]<0.7) );
         graph->add_edge(id, id2, val, val);
       }
     }
@@ -455,8 +456,10 @@ void OccupancyGrid::graphcut(double gamma, double unknownProb)
         id = k * maxI * maxJ + j * maxI + i;
         occupied =
           (graph->what_segment(id, GraphType::SINK) == GraphType::SOURCE);
-        key = OcTreeKey(min.k[0]+i, min.k[1]+j, min.k[2]+k);
-        tree->updateNode(key, occupied);
+        if (occupied) {
+          key = OcTreeKey(min.k[0]+i, min.k[1]+j, min.k[2]+k);
+          tree->updateNode(key, true);
+        }
       }
     }
   }

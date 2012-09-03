@@ -84,13 +84,13 @@ class SfMReader
     int getImageID(string filename);
     bool selectPointsForCamera(int id,
                                bool calcInvisible=true,
-                               Scalar colourCamera = Scalar(0,255,255),
-                               Scalar colourSelectedCamera = Scalar(0,0,255),
+                               Scalar colourCamera = Scalar(150,0,255),
+                               Scalar colourSelectedCamera = Scalar(0,255,0),
                                Scalar colourVisiblePoint = Scalar(0,255,0),
                                Scalar colourInvisiblePoint = Scalar(0,0,255));
     bool selectCamerasForPoint(int id,
-                               Scalar colourCamera = Scalar(0,255,255),
-                               Scalar colourSelectedCamera = Scalar(0,0,255),
+                               Scalar colourCamera = Scalar(150,0,255),
+                               Scalar colourSelectedCamera = Scalar(0,255,0),
                                Scalar colourSelectedPoint = Scalar(0,255,0));
 
     void resetPointColours();

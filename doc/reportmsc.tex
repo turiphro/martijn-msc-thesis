@@ -6,11 +6,19 @@
 %twoside for double page printing
 \usepackage{graphics}
 \usepackage{graphicx}
+\usepackage{pdflscape}
 \usepackage{subfigure}
+\usepackage{multicol}
 \usepackage{color}
+ \definecolor{dkgreen}{rgb}{0,0.6,0}
+ \definecolor{gray}{rgb}{0.5,0.5,0.5}
+ \definecolor{mauve}{rgb}{0.58,0,0.82}
 \usepackage{verbatim}
 \usepackage{algorithm}
-\usepackage{algorithmic}
+%\usepackage{algorithmic}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{setspace}
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 \usepackage{listings}
 \usepackage{amsmath}
@@ -24,13 +32,45 @@
 % Uncomment this package to enable internal-linking:
 \usepackage[pdfborder={0 0 0}]{hyperref}
 
+\lstset{ %
+  language=C++,                   % the language of the code
+  basicstyle=\footnotesize\ttfamily,           % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=5,                   % the step between two line-numbers. If it's 1, each line 
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=none,                     % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=t,                   % sets the caption-position to top
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                 % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title
+  keywordstyle=\color{blue},      % keyword style
+  commentstyle=\color{dkgreen},   % comment style
+  stringstyle=\color{mauve},      % string literal style
+  escapeinside={\%*}{*)},         % if you want to add LaTeX within your code
+  morekeywords={*,...}            % if you want to add more keywords to the set
+}
+
 
 %%%%%%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%% 
 % hints: http://www.cs.uwaterloo.ca/~brecht/thesis-hints.html
 % - motivational image(s) in introduction
-% - process all TODO's in all .tex files
+% - process all TODO's in all .tex files, such as:
+%    - extra paper in related work
+%    - regularisation
 % - proof-read and spell-check
+% - fix regularisation code
+% - make appendices
 % - make movies of results and mention in section 'results'
+% - make DVD
 
 
 
@@ -57,7 +97,8 @@
 % worktitle
 %\title{Constructing the concave hull of an outdoor scene
 %       using visibility traces of points and edges}
-\title{Finding low-texture and reflective occluders in outdoor scenes
+\title{Structure from Visibility: \\
+       Finding low-texture and reflective occluders in outdoor scenes
        using visibility and occlusion}
 
 \author{Martijn Frederik Wouter van der Veen}
@@ -127,16 +168,16 @@
 
 
 \chapter{Implementation} % subsection of Method if < 5 pages
-\label{chp:impl}
-%\input{implementation.tex}
+\label{implementation}
+\input{implementation.tex}
 
 
 
 %%%%%%%%%%%%%%%%% EVALUTATION %%%%%%%%%%%%%%%%% 
 
 \chapter{Results and Evaluation}
-\label{chp:eval}
-%\input{evaluation.tex}
+\label{results}
+\input{results.tex}
 
 % includes short discussion
 
@@ -157,18 +198,32 @@
 
 %%% latex hints:
 
-%One should cite papers by referring to the only author, or the only two authors together, or to just the first author if there are three or more.  So one may say that we gained great wisdom from Weiss~\cite{WeissICCV01}, have been enlightened by Tuytelaars and Van Gool~\cite{TuytelaarsCVPR.2004:SynchVideo}, and are inspired by Vedula~\etal~\cite{Vedula:2005:ISM}.
-%\begin{figure}
-%\begin{center}
-%\begin{tabular}{c|cc}   % The "|" bar puts a bar in the figure
-%   \includegraphics[width=.30\columnwidth]{home.png} &  % The little "and" puts splits in the table
-%   \includegraphics[width=.30\columnwidth]{home.png} &  
-%   \includegraphics[width=.30\columnwidth]{home.png}\\
-%   (A) & (B) & (C)
-%\end{tabular}
-%\caption{Another figure caption. These should be meaningful and somewhat self-contained.} 
-%  \label{fig:SomeMoreFigs}
-%\end{center}
+%\begin{figure}[htb!]
+% \centering
+% \subfigure[]{
+%  \includegraphics[width=0.3\textwidth]{img/}  \label{fig:}
+% }
+% \subfigure[]{
+%  \includegraphics[width=0.3\textwidth]{img/}  \label{fig:}
+% }
+% \subfigure[]{
+%  \includegraphics[width=0.3\textwidth]{img/}  \label{fig:}
+% }
+% \caption{}
+% \label{fig:}
+%\end{figure}
+%
+%\begin{figure}[htb!]
+% \begin{center}
+%  \begin{tabular}{ccc}
+%   \includegraphics[width=.30\columnwidth]{img/} &
+%   \includegraphics[width=.30\columnwidth]{img/} &  
+%   \includegraphics[width=.30\columnwidth]{img/}\\
+%   (a) & (b) & (c)
+%  \end{tabular}
+%  \caption{}
+%  \label{fig:}
+% \end{center}
 %\end{figure}
 
 %\begin{equation} \label{myEqName}
@@ -192,9 +247,11 @@
 
 \cleardoublepage
 \appendix
-\chapter{}
-\label{chp:theory}
-%\input{theory.tex}
+\chapter{Installation manual}  \label{app:install}
+\chapter{User manual}  \label{app:usage}
+\chapter{Datasets}  \label{app:datasets}
+\chapter{Code listing}  \label{app:code}
+%TODO: enable \input{codelisting.tex}
 
 
 

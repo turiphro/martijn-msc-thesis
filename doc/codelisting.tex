@@ -1,0 +1,37 @@
+% TODO: code listing in landscape twoside
+\setlength{\oddsidemargin}{0.5in}
+\setlength{\evensidemargin}{0.5in}
+\setlength{\topmargin}{-0.2in}
+\addtolength{\textwidth}{1in}
+\addtolength{\textheight}{1in}
+
+\begin{landscape}
+\begin{multicols}{2}
+
+
+\section{Code of Applications}
+\lstinputlisting{../code/apps/sfmviewer.cpp}
+\lstinputlisting{../code/apps/sfmcarver.cpp}
+\lstinputlisting{../code/apps/octreegraphcut.cpp}
+\lstinputlisting{../code/apps/carveviewer.cpp}
+\lstinputlisting{../code/apps/featureviewer.cpp}
+
+%\pagebreak
+\section{Scripts}
+\lstinputlisting{../code/scripts/multi_sfmcarver.py}
+
+\pagebreak
+\section{Code of Helper classes}
+\lstinputlisting{../code/io/sfm_reader.hpp}
+\lstinputlisting{../code/io/sfm_reader.cpp}
+\lstinputlisting{../code/objects/occupancy_grid.hpp}
+\lstinputlisting{../code/objects/occupancy_grid.cpp}
+\lstinputlisting{../code/io/sequence_capture.hpp}
+\lstinputlisting{../code/io/sequence_capture.cpp}
+\lstinputlisting{../code/features/feature_sequence.hpp}
+\lstinputlisting{../code/features/feature_sequence.cpp}
+\lstinputlisting{../code/features/keypoint_tracker.hpp}
+\lstinputlisting{../code/features/keypoint_tracker.cpp}
+
+\end{multicols}
+\end{landscape}

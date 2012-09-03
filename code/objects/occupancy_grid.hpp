@@ -59,15 +59,15 @@ class OccupancyGrid
     bool carve(int method=0,
                double param1=0.1);
     bool carveBaseline();
-    bool carveSingleRay(double ignoredBorderSize=0.1,
-                        bool exportUnknowns=false,
-                        bool exportOccupied=true);
-    bool carveSingleRayInvisible(double occluderProbAddition=0.1,
-                                 bool exportOccupied=true);
-    bool carveSingleRayImproved(double occluderProbAddition=0.1,
-                                double visibleProbAddition=0.1,
-                                double threshold=0.2,
-                                bool exportOccupied=true);
+    bool carveVisSingleRay(double ignoredBorderSize=0.1,
+                                  bool exportUnknowns=false,
+                                  bool exportOccupied=true);
+    bool carveVisOccSingleRayVeto(double occluderProbAddition=0.1,
+                                  bool exportOccupied=true);
+    bool carveVisOccSingleRayGeneral(double occluderProbAddition=0.1,
+                                     double visibleProbAddition=0.1,
+                                     double threshold=0.2,
+                                     bool exportOccupied=true);
     bool save(string filename, bool binary=false);
     void graphcut(double gamma=1.0, double unknownProb=0.4);
     void extentVisibilityLists(double threshold=0.2);

@@ -41,7 +41,7 @@ int main (int argc, char** argv)
   int k;
   int i=0, last_i=-1;
   int count = occgrid.sfm->poses.size();
-  bool paused = false;
+  bool paused = true;
   VideoWriter* recorder = NULL;
   Mat output;
   namedWindow("visualise", CV_WINDOW_NORMAL);

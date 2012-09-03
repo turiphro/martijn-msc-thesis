@@ -222,3 +222,11 @@
 - Read paper Camparison and Evaluation of MVS algs
 - Read paper Manhattan-world Stereo
 
+2012/08/29-30
+=============
+- Wrote Method section
+
+2012/08/31-01
+=============
+- Wrote Implementation section
+

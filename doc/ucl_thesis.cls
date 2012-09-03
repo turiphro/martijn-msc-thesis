@@ -235,9 +235,9 @@
     \vfill%
     \begin{center}%
 
-     This report is submitted as part requirement for the MSc Degreee in\\
-     Machine Learning at University College London. It is substantially the \\
-     result of my own work except where explicitly indicated in the text.\\
+     This report is submitted as part requirement for the MSc Degree in\\
+     Computer Graphics, Vision \& Imaging at University College London. It is\\
+     substantially the result of my own work except where explicitly indicated in the text.\\
      \end{center}
     \vspace{2em}
      \begin{center}

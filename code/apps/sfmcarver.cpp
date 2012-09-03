@@ -12,7 +12,7 @@ void usage(char* name)
   cout << " sfm:    path to an nvm, ply, out or txt file" << endl;
   cout << " imgs:   path to the directory containing the images" << endl;
   cout << " save:   filename for saving the octree (.ot, or .bt for binary)" << endl;
-  cout << " method: carve method (0-2); default: 2" << endl;
+  cout << " method: carve method (0-3); default: 2" << endl;
   cout << " resol.: voxelgrid sizes (determines smallest octree node size); default: 250" << endl;
   cout << " param1: first parameter of given method; default: 0.1" << endl;
   exit(1);

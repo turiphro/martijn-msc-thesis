@@ -24,7 +24,7 @@ int main (int argc, char** argv)
     usage(argv[0]);
 
   // settings
-  double gamma =   0.6; // penalty for discontinuity in space
+  double gamma =   1; // penalty for discontinuity in space
                         // (weight for probability difference pairwise cost)
                         // > 1 does not seem to make a difference
   double unknown = 0.2; // prior; below 0.5 makes sense

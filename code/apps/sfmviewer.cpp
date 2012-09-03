@@ -306,7 +306,7 @@ int main (int argc, char** argv)
   viewer.setBackgroundColor(0,0,0);
   viewer.setPointCloudRenderingProperties(visualization::PCL_VISUALIZER_POINT_SIZE, 2, "points");
   viewer.setPointCloudRenderingProperties(visualization::PCL_VISUALIZER_POINT_SIZE, 3, "poses");
-  viewer.addCoordinateSystem (1.0);  // draw origin
+  //viewer.addCoordinateSystem (1.0);  // draw origin
   viewer.initCameraParameters ();
 
   int msg_nr = 1;
@@ -330,14 +330,14 @@ int main (int argc, char** argv)
       viewer.updatePointCloud(points, "points");
       viewer.updatePointCloud(poses, "poses"); 
       if (options.lineDraw)
-        drawLines(viewer, sfm);
+        drawLines(viewer, sfm, 500);
       else
         viewer.removeAllShapes();
       options.updated = false;
     }
   }
 
-  //PCL 1.6+: viewer.close();
+  viewer.close();
 
   // more drawing: use viewer.getRenderWindow() and use VTK
 

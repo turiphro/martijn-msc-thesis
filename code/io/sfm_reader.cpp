@@ -140,7 +140,7 @@ bool SfMReader::readNVM()
         cameras.back().radial[1] = 0;
         image_filenames.push_back(filename);
         // also add camera pose to poses point cloud:
-        poses.push_back(PointXYZRGB(255,255,0));
+        poses.push_back(PointXYZRGB(255,0,150));
         poses.back().x = cx;
         poses.back().y = cy;
         poses.back().z = cz;
@@ -267,7 +267,7 @@ bool SfMReader::readOUT()
           cameras.back().radial[0] = radial1;
           cameras.back().radial[1] = radial2;
           // also add camera pose to poses point cloud:
-          poses.push_back(PointXYZRGB(255,255,0));
+          poses.push_back(PointXYZRGB(255,0,150));
           poses.back().x = cx;
           poses.back().y = cy;
           poses.back().z = cz;
@@ -435,7 +435,7 @@ bool SfMReader::readTXT()
         cameras.back().pos[2] = cz;
         */
         // also add camera pose to poses point cloud:
-        poses.push_back(PointXYZRGB(255,255,0));
+        poses.push_back(PointXYZRGB(255,0,150));
         poses.back().x = cx;
         poses.back().y = cy;
         poses.back().z = cz;
