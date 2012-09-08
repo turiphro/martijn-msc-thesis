@@ -426,6 +426,7 @@ bool SfMReader::readTXT()
         double cx, cy, cz;  // pos: position
         sline >> cx >> cy >> cz;
         // TODO: convert and use other variables
+        // (re-projection for voodoo output currently not supported!)
 
         // add new camera to list of cameras
         /*

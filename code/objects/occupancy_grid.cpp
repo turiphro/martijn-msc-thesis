@@ -171,7 +171,7 @@ bool OccupancyGrid::carveVisSingleRay(double ignoredBorderSize,
          * Note: this is the bottle neck of the carve0 algorithm
          *       O(n^3) with n = resolution
          */
-        // TODO: this hugely decreases speed (for higher resolution)
+        // NOTE: this hugely decreases speed (for higher resolution)
         octomap2pcl(it.getCoordinate(), centre);
         for (int c=0; c<sfm->cameras.size(); c++) {
           if (sfm->reprojectsInsideImage(&centre,
@@ -184,7 +184,7 @@ bool OccupancyGrid::carveVisSingleRay(double ignoredBorderSize,
         }
       } else if (!exportOccupied
           && tree->isNodeOccupied(*it)) {
-        it->setValue(tree->getOccupancyThresLog()-1); // TODO: rem hack
+        it->setValue(tree->getOccupancyThresLog()-1); // hack
       }
 
     }

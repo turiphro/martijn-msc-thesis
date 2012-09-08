@@ -39,7 +39,7 @@ typedef struct {
 
 void drawLines(visualization::PCLVisualizer& viewer, SfMReader* sfm, int maxLines = 250)
 {
-  // TODO: faster drawing: http://stackoverflow.com/questions/2140796/draw-a-multiple-lines-set-with-vtk
+  // faster drawing: http://stackoverflow.com/questions/2140796/draw-a-multiple-lines-set-with-vtk
 
   viewer.removeAllShapes();
   stringstream name("");

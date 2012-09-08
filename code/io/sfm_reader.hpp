@@ -67,8 +67,7 @@ class SfMReader
     vector<bool> points_curr_invisible;
     vector<string> image_filenames; // used for nvm only
 
-    /* TODO: change camera representation?
-     * Possible representations:
+    /* Possible other camera representations:
      * - visualization::Camera  f, t,    fovy, lookat, up
      *    \_ has nice cvtWindowCoordinates function
      * - io::ply::camera        

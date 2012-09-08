@@ -1,6 +1,6 @@
 /* Occupancy grid; useful for carving */
 
-/* Implementation: (TODO)
+/* Implementation:
  * - own
  *    can use PCL VoxelGrid (now used as downsample filter):
  *    http://docs.pointclouds.org/trunk/classpcl_1_1_voxel_grid.html

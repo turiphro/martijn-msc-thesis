@@ -60,19 +60,6 @@
 }
 
 
-%%%%%%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%% 
-% hints: http://www.cs.uwaterloo.ca/~brecht/thesis-hints.html
-% - motivational image(s) in introduction
-% - process all TODO's in all .tex files, such as:
-%    - extra paper in related work
-%    - regularisation
-% - proof-read and spell-check
-% - fix regularisation code
-% - make appendices
-% - make movies of results and mention in section 'results'
-% - make DVD
-
-
 
 %%%%%%%%%%%%%%%%% COMMANDS %%%%%%%%%%%%%%%%% 
 \newcommand{\vect}[1]{\boldsymbol{#1}}
@@ -94,11 +81,8 @@
 
 %%%%%%%%%%%%%%%%% TITLE PAGE %%%%%%%%%%%%%%%%% 
 
-% worktitle
-%\title{Constructing the concave hull of an outdoor scene
-%       using visibility traces of points and edges}
 \title{Structure from Visibility: \\
-       Finding low-texture and reflective occluders in outdoor scenes
+       Finding low-textured and reflective occluders in outdoor scenes
        using visibility and occlusion}
 
 \author{Martijn Frederik Wouter van der Veen}
@@ -120,12 +104,13 @@
 
 \newpage
 \section*{Abstract}
-%\input{abstract.tex}
+\input{abstract.tex}
 
 
-%\newpage
-%\section*{Acknowledgements}
-% TODO
+\newpage
+\section*{Acknowledgements}
+I would like to thank Gabriel Brostow for the supervision and super vision during interesting discussions. Neill Campbell helped me getting started with the maxflow code, thanks for that. %Lastly, thanks to all other people that came with small but useful suggestions.
+
 
 \setcounter{tocdepth}{1}
 \tableofcontents
@@ -189,10 +174,10 @@
 %%%%%%%%%%%%%%%%% CONCLUSION %%%%%%%%%%%%%%%%% 
 
 \chapter{Conclusion}
-\label{chp:conc}
-%\input{conclusion.tex}
-
 % includes future work
+\label{chp:conc}
+\input{conclusion.tex}
+
 
 
 
@@ -247,11 +232,27 @@
 
 \cleardoublepage
 \appendix
+
+
+\setlength{\oddsidemargin}{0.5in}
+\setlength{\evensidemargin}{0.5in}
+\setlength{\topmargin}{-0.2in}
+\addtolength{\textwidth}{1in}
+\addtolength{\textheight}{1in}
+
 \chapter{Installation manual}  \label{app:install}
+\input{app_install.tex}
+
 \chapter{User manual}  \label{app:usage}
+\input{app_usage.tex}
+
+\begin{landscape}
 \chapter{Datasets}  \label{app:datasets}
+\input{app_datasets.tex}
+\end{landscape}
+
 \chapter{Code listing}  \label{app:code}
-%TODO: enable \input{codelisting.tex}
+\input{codelisting.tex}
 
 
 

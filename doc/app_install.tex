@@ -1,0 +1,114 @@
+Installation instructions are provided for Linux (Ubuntu/Debian) and Windows. All paths are relative to the corresponding root of unpacked archive files. The Structure from Motion tools are available online, or provided as Windows/Linux binaries in sfm/. Libraries are also available online, or provided in the mentioned versions as source code in lib/.
+
+\begin{enumerate}
+\item Install OpenCV (I used 2.4.1) - http://opencv.willowgarage.com
+
+    Linux Ubuntu, older version (2.3):
+    \begin{verbatim}
+$ sudo add-apt-repository ppa:gijzelaar/cuda
+$ sudo add-apt-repository ppa:gijzelaar/opencv2.3
+$ sudo apt-get update
+$ sudo apt-get install libcv-dev
+    \end{verbatim}
+
+    Linux Ubuntu, newest version from source:
+    \begin{verbatim}
+$ sudo apt-get install cmake pkg-config libavformat-dev libswscale-dev \
+  libavcodec-dev libavfilter-dev libpython2.7 python-dev python2.7-dev \
+  python-numpy libgstreamer0.10-0-dbg libgstreamer0.10-0 \
+  libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libdc1394-22-dev \
+  libdc1394-22 libdc1394-utils libavformat-dev libxine-dev \
+  libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libv4l-dev \
+  libtbb-dev libqt4-dev libgtk2.0-dev openni-dev sphinx-common
+$ mkdir release && cd release
+$ cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D \
+  BUILD_PYTHON_SUPPORT=ON -D WITH_QT=ON -D WITH_XINE=ON -D WITH_V4L=ON -D \
+  WITH_OPENGL=ON -D WITH_OPENNI=ON -D WITH_TBB=ON -D BUILD_DOCUMENTATION=ON \
+  -D BUILD_EXAMPLES=ON release ..
+$ make && sudo make install
+    \end{verbatim}
+
+    Windows: \\
+     Run binary executable from http://sourceforge.net/projects/opencvlibrary/files/opencv-win/2.4.0/
+
+
+\item Install Point Cloud Library (I used 1.6) - http://pointclouds.org
+
+    Linux Ubuntu:
+    \begin{verbatim}
+$ sudo add-apt-repository ppa:v-launchpad-jochen-sprickerhof-de/pcl
+$ sudo apt-get update;
+$ sudo apt-get install libpcl-all
+    \end{verbatim}
+
+    Others (including Windows): \\
+     Run binary executable or compile source from http://pointclouds.org/downloads/
+
+
+\item Install OctoMap (I used 1.4.2) - http://octomap.sourceforge.net
+
+    Linux Ubuntu:
+    \begin{verbatim}
+$ sudo apt-get install cmake doxygen libqt4-dev libqt4-opengl-dev
+$ cd build && cmake .. && make && sudo make install
+    \end{verbatim}
+
+    Windows (Cygwin):
+    \begin{verbatim}
+$ cd build && cmake .. && make && make install
+    \end{verbatim}
+
+
+\item Install one or more of the following Structure from Motion estimators.
+   VisualSFM seems to give the best results, so I recommend going for that one.
+   Bundler and Voodoo output files are partly supported, but currently not
+   everything will work.
+
+   Website: http://www.cs.washington.edu/homes/ccwu/vsfm/
+
+   \begin{itemize}
+   \item VisualSFM (I used 0.5.17)
+
+        Linux (tested on Ubuntu): \\
+          Need to install SiftGPU, which needs some hacks in the source code (!)
+          Need to install PBA, which needs some hacks in the source code as well
+          (include sys/types.h, stdio.h, stdlib.h)
+          For GPU acceleration, need to install CUDA as well.
+          Otherwise, download Lowe's sift binary (extract binary only to vsfm/bin/):
+          http://www.cs.ubc.ca/~lowe/keypoints/ \\
+
+        Windows: \\
+          Executable seems to work fine after installing the CUDA toolbox. You may
+          get errors concerning some CUDA dll file; search and download it from
+          The Internet and put it in the same directory as the VisualSfM executable. \\
+
+        Optionally, one could additionally install CMVS/PMVS for dense reconstruction
+        (for comparison only; the dense output is not used for carving).
+
+   \item Voodoo (I used 1.2.0 beta)
+
+        Download binary from:
+        http://www.digilab.uni-hannover.de/download.html \\
+
+        Note that Voodoo does not export visibility information for feature points.
+        Therefore, important parts of the program (i.e. carving) will not work using
+        Voodoo's output. The viewers will work fine.
+
+   \item Bundler (I used 0.4)
+
+        Windows: \\
+          Download and install binary from: http://phototour.cs.washington.edu/bundler/
+
+        Linux (Ubuntu/Debian):
+        \begin{verbatim}
+$ sudo apt-get install gfortran libgfortran3 liblapack-dev libblas-dev \
+                     libblacs-mpi-dev libminpack1 libf2c2-dev libann-dev
+Compile from source (http://phototour.cs.washington.edu/bundler/)
+Need to make some patches as suggested by gcc.
+$ sudo cp lib/libANN_char.so /usr/lib/
+        \end{verbatim}
+
+   \end{itemize}
+
+\end{enumerate}
+

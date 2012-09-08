@@ -9,10 +9,10 @@ methods     = [0, 1, 2, 3]
 params1     = [ [0], [0, 0.5], [0.005, 0.01, 0.05, 0.1], [0.001, 0.005, 0.01] ] # list of lists (one foreach method)
 resolutions = [250, 500, 1000, 2500]
 
-datasets = ['chess']
-methods = [2]
-params1 = [ [0.001, 0.005, 0.01]]
-
+datasets    = ['temple']
+methods     = [0,2,1]
+params1     = [ [0], [0.0001, 0.0005, 0.001], [0] ]
+resolutions = [250, 500, 1000, 2500]
 ext         = '.ot'  # .ot or .bt for binary
 skip_done   = True
 

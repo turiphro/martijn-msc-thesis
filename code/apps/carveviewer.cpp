@@ -48,8 +48,6 @@ int main (int argc, char** argv)
   while (1) {
     if (occgrid.visualisePose(output, i, "circle", 0.2)) {
 
-      // TODO: buffer?
-
       imshow("visualise", output);
       
       // if recording, save frame

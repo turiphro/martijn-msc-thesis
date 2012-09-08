@@ -1,0 +1,95 @@
+\begin{enumerate}
+\item Structure from Motion
+
+   VisualSfM:
+   \begin{verbatim}
+     1. Load images:               File -> Open+ Multiple Images
+     2. Calc+Match SIFT features:  SfM  -> Pairwise Matching -> Compute Missing Match
+     3. Reconstruct (Bundle Adj):  SfM  -> Reconstruct 3D
+     4. Save sparse point cloud:   SfM  -> Save NV Match (.nvm)
+     5. Dense (optional):          SfM  -> Run CMVS/PMVS
+   \end{verbatim}
+
+   Voodoo:
+   \begin{verbatim}
+     1. Load images:               File -> Open -> Sequence
+     2. Calc+Track features:       Track (bottom panel)
+     3. Save:                      File -> Save -> Textfile (.txt)
+   \end{verbatim}
+
+   Bundler:
+   \begin{verbatim}
+     1. Run provided script from within direct of images (Cygwin)
+     2. Result is saved in bundle/bundle.out
+   \end{verbatim}
+
+
+\item Visualisation of SfM results
+
+   \begin{verbatim}
+   ./sfmviewer <sfm> [<images>]
+   where sfm is the path to an nvm, ply, out or txt file,
+   and images is the path to the corresponding directory with images.
+   \end{verbatim}
+
+   Select points or cameras with Shift + Click. \\
+   Enable/disable line drawing with 'd'. \\
+   More shortcuts listed with 'h' (PCL) and '?' (custom).
+
+
+\pagebreak
+\item Space Carving
+
+   \begin{verbatim}
+   ./sfmcarver <sfm> <imgs> <save> [<method> [<resolution> [<param1>]]
+     sfm:    path to an nvm, ply, out or txt file
+     imgs:   path to the directory containing the images
+     save:   filename for saving the octree (.ot, or .bt for binary)
+     method: carve method (0-3); default: 2;
+             0=discretised, 1=vis, 2=vis+occ veto, 3=vis+occ+extend vis lists
+     resol.: voxelgrid sizes (determines smallest octree node size); default: 250
+     param1: first parameter of given method; default: 0.1
+   \end{verbatim}
+
+
+\item Visualisation of Space Carve results
+
+   \begin{verbatim}
+   octovis <carve>
+     where carve is an octree file (.ot or .bt)
+   \end{verbatim}
+
+   or:
+
+   \begin{verbatim}
+   ./carveviewer <sfm> <imgs> <carve>
+     where sfm is the path to an nvm, ply, out or txt file
+     imgs is the path to the directory containing the images
+     and carve is an octree file (.ot or .bt)
+   \end{verbatim}
+   
+
+\item Optional: regularisation
+
+   \begin{verbatim}
+   ./octreegraphcut <octree in> <octree out> [<gamma> [<unknown>]]
+     octree in/out: filename of octree file (.ot, or .bt for binary)
+     gamma:         weight of voxel prob difference for pairwise cost; default: 1
+     unknown:       occupancy probability of unknown (un-initialised) voxels;
+                    default: 0.2
+   \end{verbatim}
+
+
+\item Optional: feature visualisation
+
+   \begin{verbatim}
+   ./featureviewer <path> [<pointDetector> [<pointDescriptor> [<edgeDetector>]]]
+     where path is the path to an AVI file, directory containing
+     a sequence of images, or webcam device number;
+     pointDetector: {SIFT, SURF, ORB, FAST, STAR, MSER, GFTT, HARRIS,
+                     Dense, SimpleBlob};
+     pointDescriptor: {SIFT, SURF, ORB, BRIEF};
+     edgeDetector: {CANNY, HARRIS}
+   \end{verbatim}
+
+\end{enumerate}
