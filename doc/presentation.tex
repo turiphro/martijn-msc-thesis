@@ -151,10 +151,10 @@
 \end{frame}
 
 
-\subsection{Carving}
+\subsection{Space Carving}
 
 \begin{frame}
-  \frametitle{Carving}
+  \frametitle{Space Carving (silhouettes)}
   \begin{figure}[htb!]
    \centering
    \includegraphics[width=1.0\textwidth]{img/carving1}
@@ -163,7 +163,7 @@
   \end{figure}
 \end{frame}
 \begin{frame}
-  \frametitle{Carving}
+  \frametitle{Space Carving (silhouettes)}
   \begin{figure}[htb!]
    \centering
    \includegraphics[width=1.0\textwidth]{img/carving2}
@@ -172,7 +172,7 @@
   \end{figure}
 \end{frame}
 \begin{frame}
-  \frametitle{Carving}
+  \frametitle{Space Carving (silhouettes)}
   \begin{figure}[htb!]
    \centering
    \includegraphics[width=1.0\textwidth]{img/carving3}
@@ -181,7 +181,7 @@
   \end{figure}
 \end{frame}
 \begin{frame}
-  \frametitle{Carving}
+  \frametitle{Space Carving (silhouettes)}
   \begin{figure}[htb!]
    \centering
    \includegraphics[width=1.0\textwidth]{img/carving4}
@@ -190,7 +190,7 @@
   \end{figure}
 \end{frame}
 \begin{frame}
-  \frametitle{Carving}
+  \frametitle{Space Carving (silhouettes)}
   \begin{figure}[htb!]
    \centering
    \includegraphics[width=1.0\textwidth]{img/carving5}
@@ -199,7 +199,7 @@
   \end{figure}
 \end{frame}
 \begin{frame}
-  \frametitle{Carving}
+  \frametitle{Space Carving (silhouettes)}
   \begin{figure}[htb!]
    \centering
    \includegraphics[width=1.0\textwidth]{img/carving6}
@@ -212,14 +212,14 @@
 %  \centerline{\Huge BUT}
 %\end{frame}
 \begin{frame}
-  \frametitle{Carving}
+  \frametitle{Space Carving (silhouettes)}
   We get:
   \begin{itemize}
     \item Con\textbf{vex} hull
   \end{itemize}
   BUT:
   \begin{itemize}
-    \item Finding silhouettes necessary (Green Screen)
+    \item Finding silhouettes necessary (can use Green Screen)
     \item Often one (simple) object only
   \end{itemize}
 \end{frame}
@@ -245,15 +245,13 @@
   Example: Kinect (structured light):
   \begin{figure}[htb!]
    \centering
-   \includegraphics[width=0.4\textwidth]{img/kinect_pattern}
-   \caption*{\tiny Source: http://www.hackengineer.com/structured-light-vs-microsoft-kinect/}
-   \label{fig:kinect_pattern}
-  \end{figure}
-  \begin{figure}[htb!]
-   \centering
-   \includegraphics[width=0.6\textwidth]{img/kinect}
-   \caption*{\tiny Source: KinectFusion: Real-time 3D Reconstruction \& Interaction Using a Moving Depth Camera [2011]}
-   \label{fig:kinect}
+   \subfigure{
+    \includegraphics[width=0.4\textwidth]{img/kinect_pattern}  %\label{fig:}
+   }
+   \subfigure{
+    \includegraphics[width=0.4\textwidth]{img/kinect}  %\label{fig:}
+   }
+   \caption*{\tiny Left: http://www.hackengineer.com/structured-light-vs-microsoft-kinect  \\ Right: KinectFusion: Real-time 3D Reconstruction and Interaction Using a Moving Depth Camera (2011)}
   \end{figure}
 \end{frame}
 
@@ -267,12 +265,12 @@
 
   \begin{figure}[htb!]
    \centering
-   \includegraphics[width=0.4\textwidth]{img/depthmap_single}
+   \includegraphics[width=0.3\textwidth]{img/depthmap_single}
    \caption*{\tiny Source: Manhattan-world Stereo [2009]}
   \end{figure}
   \begin{figure}[htb!]
    \centering
-   \includegraphics[width=0.6\textwidth]{img/depthmap_merged}
+   \includegraphics[width=0.8\textwidth]{img/depthmap_merged}
    \caption*{\tiny Source: Real-Time Visibility-Based Fusion of Depth Maps [2007]}
   \end{figure}
 \end{frame}
@@ -521,5 +519,42 @@
 \end{frame}
 
 
+\section*{Question Resources}
+
+\begin{frame}
+  \frametitle{Texture-rich object}
+  \begin{figure}[htb!]
+   \centering
+   \subfigure{
+    \includegraphics[width=0.45\textwidth]{img/temple_frame}  %\label{fig:}
+   }
+   \subfigure{
+    \includegraphics[width=0.45\textwidth]{img/temple_visocc}  %\label{fig:}
+   }
+   \caption*{\tiny Middelbury Multi-View Temple dataset (2006)}
+  \end{figure}
+  \href{run:./vid/13-temple-visocc.mp4}{\tiny Smoooooooth animation!} \\
+\end{frame}
+
+\begin{frame}
+  \frametitle{`Bad' result}
+  \begin{figure}[htb!]
+   \centering
+   \subfigure{
+    \includegraphics[width=0.25\textwidth]{img/failure_frame}  %\label{fig:}
+   }
+   \subfigure{
+    \includegraphics[width=0.7\textwidth]{img/failure_visocc}  %\label{fig:}
+   }
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Visibility-only Space Carving}
+  \begin{figure}[htb!]
+   \centering
+   \includegraphics[width=0.8\textwidth]{img/memorial_carve1}
+  \end{figure}
+\end{frame}
 
 \end{document}
